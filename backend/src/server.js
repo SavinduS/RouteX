@@ -10,6 +10,7 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json()); // Body parser (JSON data කියවන්න)
+app.use('/api/test', require('./routes/testRoutes'));
 
 // Basic Route (වැඩද කියලා බලන්න)
 app.get('/', (req, res) => {
