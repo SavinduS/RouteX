@@ -12,6 +12,10 @@ app.use(cors());
 app.use(express.json()); // Body parser (JSON data කියවන්න)
 app.use("/api/test", require("./routes/testRoutes"));
 
+const adminRoutes = require('./routes/adminRoutes');
+app.use('/api/admin', adminRoutes);
+
+
 // Basic Route (වැඩද කියලා බලන්න)
 app.get("/", (req, res) => {
   res.send("RouteX Backend API is Running...");
