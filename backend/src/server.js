@@ -15,6 +15,8 @@ app.use("/api/test", require("./routes/testRoutes"));
 const adminRoutes = require('./routes/adminRoutes');
 app.use('/api/admin', adminRoutes);
 
+app.use("/api/auth", require("./routes/authRoutes"));
+app.use("/api/users", require("./routes/userRoutes"));
 
 // Basic Route (වැඩද කියලා බලන්න)
 app.get("/", (req, res) => {
