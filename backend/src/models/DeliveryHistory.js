@@ -18,8 +18,8 @@ const deliveryHistorySchema = new mongoose.Schema({
     required: true,
   },
   total_cost: { type: Number, required: true },
-  driver_earnings: { type: Number, required: true },
-  platform_earnings: { type: Number, required: true },
+  driver_earnings: { type: Number, required: true }, // Saved from pricingLogic
+  platform_earnings: { type: Number, required: true }, // Saved from pricingLogic
   completed_at: { type: Date, default: Date.now },
 });
 
