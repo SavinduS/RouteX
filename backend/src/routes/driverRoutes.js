@@ -1,11 +1,18 @@
 const express = require("express");
 const router = express.Router();
+
+const auth = require("../middleware/auth");
+const role = require("../middleware/role");
+const verifiedDriver = require("../middleware/verifiedDriver");
+
 const {
   updateLocation,
   getAvailableOrders,
   acceptOrder,
   updateOrderStatus,
 } = require("../controllers/driverController");
+
+router.use(auth, role("driver"), verifiedDriver);
 
 // 1. Update Driver Location (POST /api/driver/location)
 router.route("/location").post(updateLocation);

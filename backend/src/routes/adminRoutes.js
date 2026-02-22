@@ -1,5 +1,9 @@
 const express = require('express');
 const router = express.Router();
+
+const auth = require("../middleware/auth");
+const role = require("../middleware/role");
+
 const {
   getRevenueAnalytics,
   getCourierPerformance,
@@ -11,6 +15,8 @@ const {
   getAllOrders,
   checkAndMarkDelays,
 } = require('../controllers/adminController');
+
+router.use(auth, role("admin"));
 
 router.get('/analytics/revenue', getRevenueAnalytics);
 router.get('/analytics/courier-performance', getCourierPerformance);
