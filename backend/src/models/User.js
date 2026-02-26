@@ -62,5 +62,5 @@ const UserSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// ✅ Fix for OverwriteModelError with nodemon/hot reload
+//  Fix for OverwriteModelError with nodemon/hot reload
 module.exports = mongoose.models.User || mongoose.model("User", UserSchema);
