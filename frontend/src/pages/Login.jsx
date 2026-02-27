@@ -1,19 +1,121 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../services/api";
 import { Eye, EyeOff } from "lucide-react";
+import { useAuth0 } from "@auth0/auth0-react";
 
 export default function Login() {
   const navigate = useNavigate();
+
+  //  Auth0 hooks
+  const { loginWithRedirect, isAuthenticated, getIdTokenClaims, logout } = useAuth0();
+
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPw, setShowPw] = useState(false);
+
+  useEffect(() => {
+  const syncAuth0ToAppJwt = async () => {
+    if (!isAuthenticated) return;
+
+    try {
+      setGoogleLoading(true);
+      setError("");
+
+      const claims = await getIdTokenClaims();
+      const idToken = claims?.__raw;
+
+      if (!idToken) {
+        setError("Google login token missing.");
+        return;
+      }
+
+      const res = await fetch("http://localhost:5003/api/auth/auth0", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${idToken}` },
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        // Avoid auth0 session loop
+        try {
+          logout({ logoutParams: { returnTo: window.location.origin } });
+        } catch {}
+        setError(data?.message || "Google login failed.");
+        return;
+      }
+
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user || {}));
+
+      navigate("/");
+    } catch (err) {
+      setError("Google login failed.");
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
+  syncAuth0ToAppJwt();
+}, [isAuthenticated, getIdTokenClaims, navigate, logout]);
 
   const handleChange = (e) => {
     setError("");
     setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
   };
+
+  //  After Auth0 Google login success -> exchange Auth0 token for YOUR JWT
+  useEffect(() => {
+    const syncAuth0ToAppJwt = async () => {
+      if (!isAuthenticated) return;
+
+      try {
+        setGoogleLoading(true);
+        setError("");
+
+        const claims = await getIdTokenClaims();
+        const idToken = claims?.__raw;
+
+        if (!idToken) {
+          setError("Google login token missing.");
+          return;
+        }
+
+        const res = await fetch("http://localhost:5003/api/auth/auth0", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+          },
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          // If backend rejected, also logout from Auth0 session to avoid loop
+          try {
+            logout({ logoutParams: { returnTo: window.location.origin } });
+          } catch {}
+          setError(data?.message || "Google login failed.");
+          return;
+        }
+
+        //  Save YOUR app token + user
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify(data.user || {}));
+
+        navigate("/");
+      } catch (err) {
+        setError("Google login failed.");
+      } finally {
+        setGoogleLoading(false);
+      }
+    };
+
+    syncAuth0ToAppJwt();
+  }, [isAuthenticated, getIdTokenClaims, navigate, logout]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -98,7 +200,6 @@ export default function Login() {
                   className="w-full rounded-xl border border-slate-200 px-4 py-3 pr-12 outline-none bg-sky-50 focus:ring-2 focus:ring-[#06B6D4]"
                 />
 
-                {/* icon button */}
                 <button
                   type="button"
                   onClick={() => setShowPw((v) => !v)}
@@ -109,7 +210,6 @@ export default function Login() {
                 </button>
               </div>
 
-              {/* Forgot password under input */}
               <div className="mt-2 text-right">
                 <a
                   href="mailto:support@routex.com?subject=Forgot%20Password%20Help"
@@ -123,10 +223,20 @@ export default function Login() {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || googleLoading}
             className="mt-6 w-full rounded-xl bg-[#06B6D4] text-white py-3 font-bold hover:opacity-90 transition disabled:opacity-60"
           >
             {loading ? "Logging in..." : "Login"}
+          </button>
+
+          {/*  Google login button */}
+          <button
+            type="button"
+            onClick={() => loginWithRedirect()}
+            disabled={loading || googleLoading}
+            className="mt-3 w-full rounded-xl border border-slate-200 bg-white py-3 font-bold text-slate-800 hover:bg-slate-50 transition disabled:opacity-60"
+          >
+            {googleLoading ? "Connecting to Google..." : "Continue with Google"}
           </button>
 
           <p className="text-sm text-slate-600 text-center pt-2">

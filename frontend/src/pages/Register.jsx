@@ -2,6 +2,8 @@ import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../services/api";
 import { Eye, EyeOff } from "lucide-react";
+import { useEffect } from "react";
+import { useAuth0 } from "@auth0/auth0-react";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -17,8 +19,11 @@ export default function Register() {
     confirm_password: "",
   });
 
+  const { loginWithRedirect, isAuthenticated, getIdTokenClaims, logout } = useAuth0();
+  const [googleLoading, setGoogleLoading] = useState(false);
+
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+ 
 
   const [showPw, setShowPw] = useState(false);
   const [showConfirmPw, setShowConfirmPw] = useState(false);
@@ -290,10 +295,19 @@ export default function Register() {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || googleLoading}
             className="mt-8 w-full rounded-xl bg-[#06B6D4] text-white py-3 font-bold hover:opacity-90 transition disabled:opacity-60"
           >
             {loading ? "Creating..." : "Register"}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => loginWithRedirect({ screen_hint: "signup" })}
+            disabled={loading || googleLoading}
+            className="mt-3 w-full rounded-xl border border-slate-200 bg-white py-3 font-bold text-slate-800 hover:bg-slate-50 transition disabled:opacity-60"
+          >
+            {googleLoading ? "Connecting to Google..." : "Continue with Google"}
           </button>
 
           <p className="text-sm text-slate-600 text-center pt-3">
