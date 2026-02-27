@@ -27,3 +27,24 @@ export const updateDelivery = async (id, updateData, token) => {
   const response = await API.put(`/deliveries/${id}`, updateData, config);
   return response.data;
 };
+
+// Admin වෙත Inquiry යැවීම
+export const sendInquiry = async (inquiryData, token) => {
+  const config = { 
+    headers: { 
+      Authorization: `Bearer ${token}` 
+    } 
+  };
+  const response = await API.post('/inquiries', inquiryData, config);
+  return response.data;
+};
+// Get Dashboard Stats (Optional: You can also calculate this from getMyDeliveries data)
+export const getDashboardStats = (deliveries) => {
+  const stats = {
+    total: deliveries.length,
+    pending: deliveries.filter(d => d.status === 'available').length,
+    inTransit: deliveries.filter(d => d.status === 'in_transit' || d.status === 'picked_up').length,
+    delivered: deliveries.filter(d => d.status === 'delivered').length,
+  };
+  return stats;
+};
