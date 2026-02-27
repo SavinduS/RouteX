@@ -1,5 +1,5 @@
 const Order = require('../models/deliveryModel'); 
-const User = require('../models/userModel');
+const User = require('../models/User');
 const BusinessRule = require('../models/BusinessRule');
 const DeliveryHistory = require('../models/DeliveryHistory');
 
