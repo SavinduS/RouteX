@@ -1,12 +1,13 @@
 const Order = require('../models/deliveryModel'); 
-const User = require('../models/userModel');
+const User = require('../models/User');
 const BusinessRule = require('../models/BusinessRule');
+const DeliveryHistory = require('../models/DeliveryHistory');
 
-// 1. Revenue Analytics (Stats + Chart Data)
+// 1. Revenue Analytics (Calculated from DeliveryHistory)
 const getRevenueAnalytics = async (req, res) => {
   try {
-    const result = await Order.aggregate([
-      { $match: { status: 'delivered' } },
+    const result = await DeliveryHistory.aggregate([
+      { $match: { final_status: 'delivered' } }, 
       {
         $facet: {
           "totals": [
@@ -14,34 +15,17 @@ const getRevenueAnalytics = async (req, res) => {
               $group: {
                 _id: null,
                 totalRevenue: { $sum: '$total_cost' },
+                platformEarnings: { $sum: '$platform_earnings' },
                 totalDeliveries: { $sum: 1 },
-              },
-            },
-            {
-              $lookup: {
-                from: 'businessrules',
-                pipeline: [{ $limit: 1 }],
-                as: 'businessRule',
-              },
-            },
-            { $unwind: '$businessRule' },
-            {
-              $project: {
-                _id: 0,
-                totalRevenue: 1,
-                totalDeliveries: 1,
-                platformEarnings: {
-                  $multiply: ['$totalRevenue', { $divide: ['$businessRule.platform_cut_percent', 100] }],
-                },
               },
             }
           ],
           "monthlyBreakdown": [
             {
               $group: {
-                _id: { $dateToString: { format: "%b", date: "$created_at" } },
+                _id: { $dateToString: { format: "%b", date: "$completed_at" } },
                 revenue: { $sum: "$total_cost" },
-                monthNum: { $first: { $month: "$created_at" } }
+                monthNum: { $first: { $month: "$completed_at" } }
               }
             },
             { $sort: { monthNum: 1 } },
@@ -50,13 +34,15 @@ const getRevenueAnalytics = async (req, res) => {
         }
       }
     ]);
+
     const data = {
       stats: result[0].totals[0] || { totalRevenue: 0, platformEarnings: 0, totalDeliveries: 0 },
       chartData: result[0].monthlyBreakdown || []
     };
+
     res.status(200).json({ success: true, data });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 
@@ -65,12 +51,8 @@ const getCourierPerformance = async (req, res) => {
   try {
     const courierPerformance = await Order.aggregate([
       { $match: { driver_id: { $ne: null } } },
-      {
-        $group: { _id: '$driver_id', totalDeliveries: { $sum: 1 } },
-      },
-      {
-        $lookup: { from: 'users', localField: '_id', foreignField: '_id', as: 'driverDetails' },
-      },
+      { $group: { _id: '$driver_id', totalDeliveries: { $sum: 1 } } },
+      { $lookup: { from: 'users', localField: '_id', foreignField: '_id', as: 'driverDetails' } },
       { $unwind: '$driverDetails' },
       {
         $project: { _id: 0, driverId: '$_id', driverName: '$driverDetails.full_name', totalDeliveries: 1 },
@@ -102,7 +84,7 @@ const updateBusinessRule = async (req, res) => {
   }
 };
 
-// 4. User Management (Entrepreneurs & Drivers)
+// 4. User Management
 const getEntrepreneurs = async (req, res) => {
     try {
         const users = await User.find({ role: 'entrepreneur' }).select('-password_hash');
@@ -123,24 +105,14 @@ const getDrivers = async (req, res) => {
 
 const verifyDriver = async (req, res) => {
     try {
-        const { id } = req.params;
-        const updatedDriver = await User.findByIdAndUpdate(
-            id, 
-            { is_verified: true }, 
-            { new: true }
-        ).select('-password_hash');
-
-        if (!updatedDriver) {
-            return res.status(404).json({ success: false, message: 'Driver not found' });
-        }
-
+        const updatedDriver = await User.findByIdAndUpdate(req.params.id, { is_verified: true }, { new: true });
         res.status(200).json({ success: true, data: updatedDriver });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }
 };
 
-// 5. Order Monitoring
+// 5. Active Order Monitoring
 const getAllOrders = async (req, res) => {
   try {
     const { status } = req.query;
@@ -166,6 +138,16 @@ const checkAndMarkDelays = async (req, res) => {
   }
 };
 
+// 7. Order History
+const getOrderHistory = async (req, res) => {
+    try {
+        const history = await DeliveryHistory.find().sort({ completed_at: -1 });
+        res.status(200).json({ success: true, data: history });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+};
+
 module.exports = {
   getRevenueAnalytics,
   getCourierPerformance,
@@ -176,4 +158,5 @@ module.exports = {
   verifyDriver,
   getAllOrders,
   checkAndMarkDelays,
+  getOrderHistory
 };
