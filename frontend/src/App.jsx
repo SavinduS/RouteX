@@ -22,14 +22,14 @@ function App() {
       <Route path="/register" element={<Register />} />
       <Route path="/login" element={<Login />} />
 
-      {/* Admin Routes
+      {/* Admin Routes */}
       <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<AdminDashboard />} />
         <Route path="orders" element={<AdminOrders />} />
         <Route path="pricing" element={<AdminPricing />} />
         <Route path="couriers" element={<AdminCouriers />} />
         <Route path="entrepreneurs" element={<AdminUsers />} />
-      </Route> */}
+      </Route> 
 
       {/* Fallback for unknown routes */}
       <Route path="*" element={<Navigate to="/" />} />

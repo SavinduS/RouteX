@@ -1,9 +1,8 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { Eye, EyeOff, X } from "lucide-react";
 import api from "../services/api";
-import { Eye, EyeOff } from "lucide-react";
-import { useEffect } from "react";
-import { useAuth0 } from "@auth0/auth0-react";
+import GoogleSignInButton from "../components/GoogleSignInButton";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -12,256 +11,268 @@ export default function Register() {
     full_name: "",
     email: "",
     phone_number: "",
-    role: "entrepreneur", // entrepreneur | driver
+    role: "entrepreneur",
     vehicle_type: "",
     license_number: "",
     password: "",
     confirm_password: "",
   });
 
-  const { loginWithRedirect, isAuthenticated, getIdTokenClaims, logout } = useAuth0();
-  const [googleLoading, setGoogleLoading] = useState(false);
-
-  const [loading, setLoading] = useState(false);
- 
-
+  const [error, setError] = useState("");
   const [showPw, setShowPw] = useState(false);
   const [showConfirmPw, setShowConfirmPw] = useState(false);
 
   const isDriver = form.role === "driver";
 
   const handleChange = (e) => {
-    setError("");
-    const { name, value } = e.target;
+  const { name, value } = e.target;
 
-    // If switching away from driver, clear driver-only fields
-    if (name === "role" && value !== "driver") {
-      setForm((p) => ({
-        ...p,
-        role: value,
-        vehicle_type: "",
-        license_number: "",
-      }));
-      return;
-    }
-
-    setForm((p) => ({ ...p, [name]: value }));
-  };
-
-  // Phone: only digits, max 10
-  const handlePhoneChange = (e) => {
-    setError("");
-    const raw = e.target.value;
-
-    // keep only digits
-    const digitsOnly = raw.replace(/\D/g, "").slice(0, 10);
-
+  // PHONE NUMBER (only digits, max 10)
+  if (name === "phone_number") {
+    const digitsOnly = value.replace(/\D/g, "").slice(0, 10);
     setForm((p) => ({ ...p, phone_number: digitsOnly }));
-  };
+    return;
+  }
+
+  // FULL NAME (letters + spaces only)
+  if (name === "full_name") {
+    const cleanName = value.replace(/[^a-zA-Z\s]/g, "");
+    setForm((p) => ({ ...p, full_name: cleanName }));
+    return;
+  }
+
+  // LICENSE NUMBER (letters + numbers only)
+  if (name === "license_number") {
+    const cleanLicense = value.replace(/[^a-zA-Z0-9]/g, "");
+    setForm((p) => ({ ...p, license_number: cleanLicense }));
+    return;
+  }
+
+  if (name === "role" && value !== "driver") {
+    setForm((p) => ({
+      ...p,
+      role: value,
+      vehicle_type: "",
+      license_number: "",
+    }));
+    return;
+  }
+
+  setForm((p) => ({ ...p, [name]: value }));
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
 
-    // Required common fields
-    if (
-      !form.full_name ||
-      !form.email ||
-      !form.phone_number ||
-      !form.password ||
-      !form.confirm_password
-    ) {
-      setError("Please fill all fields.");
-      return;
-    }
+    if (!form.full_name.trim()) {
+  return setError("Full name is required");
+}
 
-    // phone must be exactly 10 digits
-    if (form.phone_number.length !== 10) {
-      setError("Phone number must be 10 digits.");
-      return;
-    }
+if (!form.email.trim()) {
+  return setError("Email is required");
+}
 
-    // password min 4 (your requirement)
-    if (form.password.length < 4) {
-      setError("Password must be at least 4 characters.");
-      return;
-    }
+if (form.phone_number.length !== 10) {
+  return setError("Phone number must be exactly 10 digits");
+}
+
+if (isDriver && !form.license_number.trim()) {
+  return setError("License number is required for drivers");
+}
+
+if (form.password.length < 6) {
+  return setError("Password must be at least 6 characters");
+}
 
     if (form.password !== form.confirm_password) {
-      setError("Passwords do not match.");
-      return;
-    }
-
-    // Driver-only validation
-    if (isDriver) {
-      if (!form.vehicle_type || !form.license_number) {
-        setError("Please fill vehicle type and license number for driver.");
-        return;
-      }
+      return setError("Passwords do not match");
     }
 
     try {
-      setLoading(true);
-      setError("");
-
-      const payload = {
-        full_name: form.full_name,
-        email: form.email,
-        phone_number: form.phone_number,
-        role: form.role,
-        password: form.password,
-        ...(isDriver
-          ? {
-              vehicle_type: form.vehicle_type,
-              license_number: form.license_number,
-            }
-          : {}),
-      };
-
-      await api.post("/auth/register", payload);
+      await api.post("/auth/register", form);
       navigate("/login");
     } catch (err) {
-      setError(err?.response?.data?.message || "Registration failed.");
-    } finally {
-      setLoading(false);
+      setError(err?.response?.data?.message || "Registration failed");
     }
   };
 
+  const handleGoogleSuccess = async (idToken) => {
+    try {
+      setError("");
+      const { data } = await api.post("/auth/google", { credential: idToken });
+
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      window.dispatchEvent(new Event("storage"));
+      navigate("/");
+    } catch {
+      setError("Google authentication failed");
+    }
+  };
+
+  // Smaller inputs + hide browser built-in password reveal icon (Edge/IE)
+  const inputCls =
+    "mt-1.5 w-full h-11 rounded-2xl border border-slate-200 bg-[#F1F8FF] px-4 text-sm outline-none " +
+    "focus:ring-2 focus:ring-[#06B6D4] " +
+    "[&::-ms-reveal]:hidden [&::-ms-clear]:hidden";
+  const selectCls =
+    "mt-1.5 w-full h-11 rounded-2xl border border-slate-200 bg-white px-4 text-sm outline-none focus:ring-2 focus:ring-[#06B6D4]";
+
+  const iconBtnCls =
+    "absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-xl text-[#1D4ED8] hover:bg-slate-100 transition";
+
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-[#F1F5F9]">
-      <div className="relative w-full max-w-3xl bg-white border border-slate-200 rounded-3xl shadow-sm p-8 md:p-10">
-        {/* Close (go Home) */}
+    <div className="min-h-screen flex items-center justify-center bg-slate-200 px-4">
+      {/* smaller card */}
+      <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl px-8 py-7">
+        {/* Close */}
         <button
-          type="button"
           onClick={() => navigate("/")}
-          className="absolute top-5 right-6 text-lg font-semibold text-[#0F172A] hover:text-[#1D4ED8] transition"
+          className="absolute right-5 top-5 text-slate-500 hover:text-black"
           aria-label="Close"
         >
-          ✕
+          <X size={22} />
         </button>
 
-        <h1 className="text-3xl font-extrabold text-[#0F172A]">Register</h1>
-        <p className="text-sm text-slate-600 mt-1">Create your account.</p>
+        <h1 className="text-3xl font-extrabold text-slate-900">Register</h1>
+        <p className="text-slate-500 mt-1 text-sm">Create your account.</p>
 
         {error && (
-          <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+          <div className="mt-4 text-sm bg-red-50 text-red-600 px-4 py-3 rounded-xl">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="mt-6" autoComplete="off">
-          {/* Autofill trap */}
-          <input type="text" name="fakeuser" className="hidden" />
-          <input type="password" name="fakepass" className="hidden" />
-
-          {/* 2 columns (stack on mobile) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* LEFT COLUMN */}
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm font-semibold text-slate-700">Full Name</label>
-                <input
-                  name="full_name"
-                  value={form.full_name}
-                  onChange={handleChange}
-                  placeholder="Your full name"
-                  className="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 outline-none bg-sky-50 focus:ring-2 focus:ring-[#06B6D4]"
-                />
-              </div>
-
-              <div>
-                <label className="text-sm font-semibold text-slate-700">Email</label>
-                <input
-                  name="email"
-                  type="email"
-                  value={form.email}
-                  onChange={handleChange}
-                  placeholder="name@email.com"
-                  className="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 outline-none bg-sky-50 focus:ring-2 focus:ring-[#06B6D4]"
-                />
-              </div>
-
-              <div>
-                <label className="text-sm font-semibold text-slate-700">Phone Number</label>
-                <input
-                  name="phone_number"
-                  value={form.phone_number}
-                  onChange={handlePhoneChange}
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  maxLength={10}
-                  placeholder="07XXXXXXXX"
-                  className="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 outline-none bg-sky-50 focus:ring-2 focus:ring-[#06B6D4]"
-                />
-              </div>
+        <form onSubmit={handleSubmit} className="mt-5">
+          {/* smaller gaps */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+            {/* Full Name */}
+            <div>
+              <label className="text-xs font-semibold text-slate-700">
+                Full Name
+              </label>
+              <input
+                type="text"
+                name="full_name"
+                value={form.full_name}
+                onChange={handleChange}
+                className={inputCls}
+                placeholder="Your full name"
+                autoComplete="name"
+              />
             </div>
 
-            {/* RIGHT COLUMN */}
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm font-semibold text-slate-700">Role</label>
-                <select
-                  name="role"
-                  value={form.role}
-                  onChange={handleChange}
-                  className="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 outline-none bg-white focus:ring-2 focus:ring-[#06B6D4]"
-                >
-                  <option value="entrepreneur">Entrepreneur</option>
-                  <option value="driver">Driver</option>
-                </select>
-              </div>
+            {/* Role */}
+            <div>
+              <label className="text-xs font-semibold text-slate-700">Role</label>
+              <select
+                name="role"
+                value={form.role}
+                onChange={handleChange}
+                className={selectCls}
+              >
+                <option value="entrepreneur">Entrepreneur</option>
+                <option value="driver">Driver</option>
+              </select>
+            </div>
 
-              {/* Driver-only fields */}
-              {isDriver && (
+            {/* Email */}
+            <div>
+              <label className="text-xs font-semibold text-slate-700">Email</label>
+              <input
+                type="email"
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                className={inputCls}
+                placeholder="name@email.com"
+                autoComplete="email"
+              />
+            </div>
+
+            {/* Vehicle Type (only driver) */}
+            <div>
+              {isDriver ? (
                 <>
-                  <div>
-                    <label className="text-sm font-semibold text-slate-700">Vehicle Type</label>
-                    <select
-                      name="vehicle_type"
-                      value={form.vehicle_type}
-                      onChange={handleChange}
-                      className="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 outline-none bg-white focus:ring-2 focus:ring-[#06B6D4]"
-                    >
-                      <option value="">Select vehicle type</option>
-                      <option value="bike">Bike</option>
-                      <option value="tuktuk">TukTuk</option>
-                      <option value="van">Van</option>
-                      <option value="truck">Truck</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="text-sm font-semibold text-slate-700">License Number</label>
-                    <input
-                      name="license_number"
-                      value={form.license_number}
-                      onChange={handleChange}
-                      placeholder="License number"
-                      className="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 outline-none bg-sky-50 focus:ring-2 focus:ring-[#06B6D4]"
-                    />
-                  </div>
+                  <label className="text-xs font-semibold text-slate-700">
+                    Vehicle Type
+                  </label>
+                  <select
+                    name="vehicle_type"
+                    value={form.vehicle_type}
+                    onChange={handleChange}
+                    className={selectCls}
+                  >
+                    <option value="">Select vehicle type</option>
+                    <option value="bike">Bike</option>
+                    <option value="tuktuk">TukTuk</option>
+                    <option value="van">Van</option>
+                    <option value="truck">Truck</option>
+                  </select>
                 </>
+              ) : (
+                <div className="hidden md:block" />
               )}
             </div>
-          </div>
 
-          {/* PASSWORD + CONFIRM (show/hide) */}
-          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Phone */}
             <div>
-              <label className="text-sm font-semibold text-slate-700">Password</label>
-              <div className="relative mt-1">
+              <label className="text-xs font-semibold text-slate-700">
+                Phone Number
+              </label>
+              <input
+                type="text"
+                name="phone_number"
+                value={form.phone_number}
+                onChange={handleChange}
+                className={inputCls}
+                placeholder="07XXXXXXXX"
+                maxLength={10}
+              />
+            </div>
+
+            {/* License Number (only driver) */}
+            <div>
+              {isDriver ? (
+                <>
+                  <label className="text-xs font-semibold text-slate-700">
+                    License Number
+                  </label>
+                  <input
+                    type="text"
+                    name="license_number"
+                    value={form.license_number}
+                    onChange={handleChange}
+                    className={inputCls}
+                    placeholder="License number"
+                    autoComplete="off"
+                  />
+                </>
+              ) : (
+                <div className="hidden md:block" />
+              )}
+            </div>
+
+            {/* Password */}
+            <div>
+              <label className="text-xs font-semibold text-slate-700">
+                Password
+              </label>
+              <div className="relative">
                 <input
-                  name="password"
                   type={showPw ? "text" : "password"}
+                  name="password"
                   value={form.password}
                   onChange={handleChange}
+                  className={`${inputCls} pr-12`}
+                  placeholder="Minimum 6 characters"
                   autoComplete="new-password"
-                  placeholder="Minimum 4 characters"
-                  className="w-full rounded-xl border border-slate-200 px-4 py-3 pr-12 outline-none bg-sky-50 focus:ring-2 focus:ring-[#06B6D4]"
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPw((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-600 hover:text-[#1D4ED8] transition"
+                  onClick={() => setShowPw((s) => !s)}
+                  className={iconBtnCls}
                   aria-label={showPw ? "Hide password" : "Show password"}
                 >
                   {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -269,23 +280,26 @@ export default function Register() {
               </div>
             </div>
 
+            {/* Confirm Password */}
             <div>
-              <label className="text-sm font-semibold text-slate-700">Confirm Password</label>
-              <div className="relative mt-1">
+              <label className="text-xs font-semibold text-slate-700">
+                Confirm Password
+              </label>
+              <div className="relative">
                 <input
-                  name="confirm_password"
                   type={showConfirmPw ? "text" : "password"}
+                  name="confirm_password"
                   value={form.confirm_password}
                   onChange={handleChange}
-                  autoComplete="new-password"
+                  className={`${inputCls} pr-12`}
                   placeholder="Re-enter password"
-                  className="w-full rounded-xl border border-slate-200 px-4 py-3 pr-12 outline-none bg-sky-50 focus:ring-2 focus:ring-[#06B6D4]"
+                  autoComplete="new-password"
                 />
                 <button
                   type="button"
-                  onClick={() => setShowConfirmPw((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-600 hover:text-[#1D4ED8] transition"
-                  aria-label={showConfirmPw ? "Hide confirm password" : "Show confirm password"}
+                  onClick={() => setShowConfirmPw((s) => !s)}
+                  className={iconBtnCls}
+                  aria-label={showConfirmPw ? "Hide password" : "Show password"}
                 >
                   {showConfirmPw ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
@@ -293,26 +307,27 @@ export default function Register() {
             </div>
           </div>
 
+          {/* Register Button (same size as Google) */}
           <button
             type="submit"
-            disabled={loading || googleLoading}
-            className="mt-8 w-full rounded-xl bg-[#06B6D4] text-white py-3 font-bold hover:opacity-90 transition disabled:opacity-60"
+            className="mt-6 w-full h-12 rounded-2xl bg-[#06B6D4] text-white font-bold hover:opacity-90 transition"
           >
-            {loading ? "Creating..." : "Register"}
+            Register
           </button>
 
-          <button
-            type="button"
-            onClick={() => loginWithRedirect({ screen_hint: "signup" })}
-            disabled={loading || googleLoading}
-            className="mt-3 w-full rounded-xl border border-slate-200 bg-white py-3 font-bold text-slate-800 hover:bg-slate-50 transition disabled:opacity-60"
-          >
-            {googleLoading ? "Connecting to Google..." : "Continue with Google"}
-          </button>
+          {/* more space between Register & Google */}
+          <div className="mt-5">
+            <GoogleSignInButton
+              fullWidth
+              heightClass="h-12"
+              onSuccess={handleGoogleSuccess}
+              onError={(msg) => setError(msg)}
+            />
+          </div>
 
-          <p className="text-sm text-slate-600 text-center pt-3">
+          <p className="text-center mt-4 text-sm text-slate-600">
             Already have an account?{" "}
-            <Link to="/login" className="font-semibold text-[#1D4ED8] hover:underline">
+            <Link to="/login" className="text-[#1D4ED8] font-semibold">
               Login
             </Link>
           </p>

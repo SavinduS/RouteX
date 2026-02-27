@@ -1,14 +1,11 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { X, Eye, EyeOff } from "lucide-react";
 import api from "../services/api";
-import { Eye, EyeOff } from "lucide-react";
-import { useAuth0 } from "@auth0/auth0-react";
+import GoogleSignInButton from "../components/GoogleSignInButton";
 
 export default function Login() {
   const navigate = useNavigate();
-
-  //  Auth0 hooks
-  const { loginWithRedirect, isAuthenticated, getIdTokenClaims, logout } = useAuth0();
 
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
@@ -16,111 +13,25 @@ export default function Login() {
   const [error, setError] = useState("");
   const [showPw, setShowPw] = useState(false);
 
-  useEffect(() => {
-  const syncAuth0ToAppJwt = async () => {
-    if (!isAuthenticated) return;
-
-    try {
-      setGoogleLoading(true);
-      setError("");
-
-      const claims = await getIdTokenClaims();
-      const idToken = claims?.__raw;
-
-      if (!idToken) {
-        setError("Google login token missing.");
-        return;
-      }
-
-      const res = await fetch("http://localhost:5003/api/auth/auth0", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${idToken}` },
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        // Avoid auth0 session loop
-        try {
-          logout({ logoutParams: { returnTo: window.location.origin } });
-        } catch {}
-        setError(data?.message || "Google login failed.");
-        return;
-      }
-
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user || {}));
-
-      navigate("/");
-    } catch (err) {
-      setError("Google login failed.");
-    } finally {
-      setGoogleLoading(false);
-    }
-  };
-
-  syncAuth0ToAppJwt();
-}, [isAuthenticated, getIdTokenClaims, navigate, logout]);
-
   const handleChange = (e) => {
     setError("");
-    setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
+    const { name, value } = e.target;
+
+    // keep email clean (optional but nice)
+    if (name === "email") {
+      setForm((p) => ({ ...p, email: value }));
+      return;
+    }
+
+    setForm((p) => ({ ...p, [name]: value }));
   };
 
-  //  After Auth0 Google login success -> exchange Auth0 token for YOUR JWT
-  useEffect(() => {
-    const syncAuth0ToAppJwt = async () => {
-      if (!isAuthenticated) return;
-
-      try {
-        setGoogleLoading(true);
-        setError("");
-
-        const claims = await getIdTokenClaims();
-        const idToken = claims?.__raw;
-
-        if (!idToken) {
-          setError("Google login token missing.");
-          return;
-        }
-
-        const res = await fetch("http://localhost:5003/api/auth/auth0", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${idToken}`,
-          },
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          // If backend rejected, also logout from Auth0 session to avoid loop
-          try {
-            logout({ logoutParams: { returnTo: window.location.origin } });
-          } catch {}
-          setError(data?.message || "Google login failed.");
-          return;
-        }
-
-        //  Save YOUR app token + user
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("user", JSON.stringify(data.user || {}));
-
-        navigate("/");
-      } catch (err) {
-        setError("Google login failed.");
-      } finally {
-        setGoogleLoading(false);
-      }
-    };
-
-    syncAuth0ToAppJwt();
-  }, [isAuthenticated, getIdTokenClaims, navigate, logout]);
+  const goHome = () => navigate("/");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!form.email || !form.password) {
+    if (!form.email.trim() || !form.password) {
       setError("Please fill all fields.");
       return;
     }
@@ -134,114 +45,138 @@ export default function Login() {
         password: form.password,
       };
 
-      const res = await api.post("/auth/login", payload);
+      const { data } = await api.post("/auth/login", payload);
 
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("user", JSON.stringify(res.data.user || {}));
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user || {}));
+      window.dispatchEvent(new Event("storage"));
 
-      navigate("/"); // no admin now
+      navigate("/");
     } catch (err) {
-      setError(err?.response?.data?.message || "Login failed.");
+      setError(err?.response?.data?.message || "Login failed");
     } finally {
       setLoading(false);
     }
   };
 
+  const handleGoogleSuccess = async (idToken) => {
+    try {
+      setGoogleLoading(true);
+      setError("");
+
+      const { data } = await api.post("/auth/google", { credential: idToken });
+
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      window.dispatchEvent(new Event("storage"));
+
+      navigate("/");
+    } catch {
+      setError("Google authentication failed");
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
+  // same UI system as Register
+  const inputCls =
+    "mt-1.5 w-full h-11 rounded-2xl border border-slate-200 bg-[#F1F8FF] px-4 text-sm outline-none " +
+    "focus:ring-2 focus:ring-[#06B6D4] " +
+    "[&::-ms-reveal]:hidden [&::-ms-clear]:hidden";
+
+  const iconBtnCls =
+    "absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-xl text-[#1D4ED8] hover:bg-slate-100 transition";
+
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-[#F1F5F9]">
-      <div className="relative w-full max-w-md bg-white border border-slate-200 rounded-3xl shadow-sm p-8">
+    <div className="min-h-screen flex items-center justify-center bg-slate-200 px-4">
+      {/* Register එක වගේ smaller card */}
+      <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl px-8 py-7">
+        {/* Close */}
         <button
           type="button"
-          onClick={() => navigate("/")}
-          className="absolute top-5 right-6 text-lg font-semibold text-[#0F172A] hover:text-[#1D4ED8] transition"
+          onClick={goHome}
+          className="absolute right-5 top-5 text-slate-500 hover:text-black"
           aria-label="Close"
         >
-          ✕
+          <X size={22} />
         </button>
 
-        <h1 className="text-3xl font-extrabold text-[#0F172A]">Login</h1>
-        <p className="text-sm text-slate-600 mt-1">Welcome back.</p>
+        <h1 className="text-3xl font-extrabold text-slate-900">Login</h1>
+        <p className="text-slate-500 mt-1 text-sm">Welcome back.</p>
 
         {error && (
-          <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+          <div className="mt-4 text-sm bg-red-50 text-red-600 px-4 py-3 rounded-xl">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="mt-6" autoComplete="off">
-          <input type="text" name="fakeuser" className="hidden" />
-          <input type="password" name="fakepass" className="hidden" />
+        <form onSubmit={handleSubmit} className="mt-5 space-y-4">
+          {/* Email */}
+          <div>
+            <label className="text-xs font-semibold text-slate-700">Email</label>
+            <input
+              type="email"
+              name="email"
+              value={form.email}
+              onChange={handleChange}
+              placeholder="name@email.com"
+              autoComplete="email"
+              className={inputCls}
+            />
+          </div>
 
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-semibold text-slate-700">Email</label>
+          {/* Password */}
+          <div>
+            <label className="text-xs font-semibold text-slate-700">
+              Password
+            </label>
+
+            <div className="relative">
               <input
-                name="email"
-                type="email"
-                value={form.email}
+                type={showPw ? "text" : "password"}
+                name="password"
+                value={form.password}
                 onChange={handleChange}
-                autoComplete="off"
-                placeholder="name@email.com"
-                className="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 outline-none bg-sky-50 focus:ring-2 focus:ring-[#06B6D4]"
+                placeholder="••••••••"
+                autoComplete="current-password"
+                className={`${inputCls} pr-12`}
               />
-            </div>
 
-            <div>
-              <label className="text-sm font-semibold text-slate-700">Password</label>
-
-              <div className="relative mt-1">
-                <input
-                  name="password"
-                  type={showPw ? "text" : "password"}
-                  value={form.password}
-                  onChange={handleChange}
-                  autoComplete="new-password"
-                  placeholder="••••••••"
-                  className="w-full rounded-xl border border-slate-200 px-4 py-3 pr-12 outline-none bg-sky-50 focus:ring-2 focus:ring-[#06B6D4]"
-                />
-
-                <button
-                  type="button"
-                  onClick={() => setShowPw((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-600 hover:text-[#1D4ED8] transition"
-                  aria-label={showPw ? "Hide password" : "Show password"}
-                >
-                  {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-
-              <div className="mt-2 text-right">
-                <a
-                  href="mailto:support@routex.com?subject=Forgot%20Password%20Help"
-                  className="text-sm font-semibold text-[#1D4ED8] hover:underline"
-                >
-                  Forgot password?
-                </a>
-              </div>
+              <button
+                type="button"
+                onClick={() => setShowPw((s) => !s)}
+                className={iconBtnCls}
+                aria-label={showPw ? "Hide password" : "Show password"}
+              >
+                {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
           </div>
 
+          {/* Login Button (same size as Google) */}
           <button
             type="submit"
             disabled={loading || googleLoading}
-            className="mt-6 w-full rounded-xl bg-[#06B6D4] text-white py-3 font-bold hover:opacity-90 transition disabled:opacity-60"
+            className="mt-6 w-full h-12 rounded-2xl bg-[#06B6D4] text-white font-bold hover:opacity-90 transition disabled:opacity-60"
           >
             {loading ? "Logging in..." : "Login"}
           </button>
 
-          {/*  Google login button */}
-          <button
-            type="button"
-            onClick={() => loginWithRedirect()}
-            disabled={loading || googleLoading}
-            className="mt-3 w-full rounded-xl border border-slate-200 bg-white py-3 font-bold text-slate-800 hover:bg-slate-50 transition disabled:opacity-60"
-          >
-            {googleLoading ? "Connecting to Google..." : "Continue with Google"}
-          </button>
+          {/* more space between Login & Google (like Register) */}
+          <div className="mt-5">
+            <GoogleSignInButton
+              fullWidth
+              heightClass="h-12"
+              onSuccess={handleGoogleSuccess}
+              onError={(msg) => setError(msg)}
+              disabled={loading || googleLoading}
+            />
+          </div>
 
-          <p className="text-sm text-slate-600 text-center pt-2">
+          {/* Bottom link */}
+          <p className="text-center mt-4 text-sm text-slate-600">
             No account?{" "}
-            <Link to="/register" className="font-semibold text-[#1D4ED8] hover:underline">
+            <Link to="/register" className="text-[#1D4ED8] font-semibold">
               Register
             </Link>
           </p>

@@ -1,12 +1,11 @@
 const express = require("express");
 const router = express.Router();
 
-const { register, login } = require("../controllers/authController");
+const { register, login, googleLogin } = require("../controllers/authController");
 const { registerValidator, loginValidator } = require("../utils/userValidators");
 
-const { auth0Login } = require("../controllers/auth0Controller");
-
-router.post("/auth0", auth0Login);
+//  Google
+router.post("/google", googleLogin);
 
 router.post("/register", registerValidator, register);
 router.post("/login", loginValidator, login);
