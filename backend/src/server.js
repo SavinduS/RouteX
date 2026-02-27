@@ -18,6 +18,8 @@ app.use('/api/admin', adminRoutes);
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/users", require("./routes/userRoutes"));
 
+const inquiryRoutes = require("./routes/inquiryRoutes");
+
 // Basic Route (වැඩද කියලා බලන්න)
 app.get("/", (req, res) => {
   res.send("RouteX Backend API is Running...");
@@ -40,6 +42,7 @@ mongoose
 // API Routes
 const deliveryRoutes = require("./routes/deliveryRoutes");
 app.use("/api/deliveries", deliveryRoutes);
+app.use("/api/inquiries", inquiryRoutes);
 
 const driverRoutes = require("./routes/driverRoutes");
 app.use("/api/driver", driverRoutes);
