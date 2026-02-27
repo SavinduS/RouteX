@@ -19,6 +19,7 @@ const orderSchema = new mongoose.Schema({
   
   receiver_name: { type: String, required: true },
   receiver_phone: { type: String, required: true },
+  receiver_email: { type: String, required: true },
   
   pickup_address: { type: String, required: true },
   pickup_lat: { type: Number, required: true },

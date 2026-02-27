@@ -127,7 +127,8 @@ const EntrepreneurDashboard = () => {
 
 // CSS Styles
 const statBox = { background: "white", padding: "20px", borderRadius: "10px", flex: 1, textAlign: "center", fontWeight: "bold", boxShadow: "0 2px 5px rgba(0,0,0,0.1)" };
-const inputStyle = { width: "100%", padding: "10px", marginBottom: "15px", borderRadius: "5px", border: "none" };
+const inputStyle = { width: "100%", padding: "10px", marginBottom: "15px", borderRadius: "5px", border: "none",color: "#000000", // මෙතනට කළු පාට (Black) එකතු කළා
+  backgroundColor: "#ffffff" };
 const btnStyle = { width: "100%", padding: "12px", background: "white", color: "#1B5E20", fontWeight: "bold", border: "none", cursor: "pointer", borderRadius: "5px" };
 
 export default EntrepreneurDashboard;

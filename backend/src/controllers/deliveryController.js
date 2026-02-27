@@ -58,6 +58,7 @@ const updateDelivery = async (req, res) => {
       // updateDelivery function එක ඇතුළත මේ පේළි දෙක දාන්න
       order.receiver_name = req.body.receiver_name || order.receiver_name;
       order.receiver_phone = req.body.receiver_phone || order.receiver_phone;
+      order.receiver_email = req.body.receiver_email || order.receiver_email;
       
       const updatedOrder = await order.save();
       res.json(updatedOrder);
