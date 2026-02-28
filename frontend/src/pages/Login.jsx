@@ -7,6 +7,11 @@ import GoogleSignInButton from "../components/GoogleSignInButton";
 export default function Login() {
   const navigate = useNavigate();
 
+  const getRedirectPathByRole = (role) => {
+    if (role === "admin") return "/admin";
+    return "/";
+  };
+
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -51,7 +56,7 @@ export default function Login() {
       localStorage.setItem("user", JSON.stringify(data.user || {}));
       window.dispatchEvent(new Event("storage"));
 
-      navigate("/");
+      navigate(getRedirectPathByRole(data?.user?.role));
     } catch (err) {
       setError(err?.response?.data?.message || "Login failed");
     } finally {
@@ -70,7 +75,7 @@ export default function Login() {
       localStorage.setItem("user", JSON.stringify(data.user));
       window.dispatchEvent(new Event("storage"));
 
-      navigate("/");
+      navigate(getRedirectPathByRole(data?.user?.role));
     } catch {
       setError("Google authentication failed");
     } finally {
@@ -78,7 +83,6 @@ export default function Login() {
     }
   };
 
-  // same UI system as Register
   const inputCls =
     "mt-1.5 w-full h-11 rounded-2xl border border-slate-200 bg-[#F1F8FF] px-4 text-sm outline-none " +
     "focus:ring-2 focus:ring-[#06B6D4] " +

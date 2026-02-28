@@ -36,7 +36,7 @@ export default function Navbar() {
   const initials = (me?.full_name?.[0] || me?.email?.[0] || "U").toUpperCase();
 
   return (
-    <nav className="flex justify-between items-center px-8 py-5 bg-white border-b border-slate-200">
+    <nav className="sticky top-0 z-50 flex justify-between items-center px-8 py-5 bg-white border-b border-slate-200 shadow-sm">
       <Link to="/" className="text-xl font-bold text-[#1D4ED8]">
         RouteX
       </Link>

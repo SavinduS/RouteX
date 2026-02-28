@@ -44,7 +44,6 @@ router.put("/update", auth, updateProfileValidator, async (req, res) => {
       if (req.body[key] !== undefined) updates[key] = req.body[key];
     }
 
-    // Block privilege changes (ignore if user tries to send them)
     // role, is_verified, vehicle_type, license_number should be admin-only
     if ("role" in req.body || "is_verified" in req.body || "vehicle_type" in req.body || "license_number" in req.body) {
       // not an error; just ignore them for safety
