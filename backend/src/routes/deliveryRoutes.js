@@ -5,16 +5,14 @@ const {
   getDeliveryById,
   updateDelivery,
   getMyDeliveries,
-} = require('../controllers/deliveryController'); // Ensure file path matches
+  getOrderTracking // මේක උඩින් import කරගන්න
+} = require('../controllers/deliveryController');
 
-// Use '/my' BEFORE '/:id' so 'my' isn't treated as an ID
 router.route('/my').get(getMyDeliveries); 
+router.route('/').post(createDelivery);
 
-router.route('/')
-  .post(createDelivery);
-
-router.route('/:id')
-  .get(getDeliveryById)
-  .put(updateDelivery);
+// Tracking route එක ID එකට පස්සේ දාන්න
+router.route('/:id').get(getDeliveryById).put(updateDelivery);
+router.route("/:id/track").get(getOrderTracking);
 
 module.exports = router;

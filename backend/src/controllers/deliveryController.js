@@ -1,26 +1,18 @@
-const Order = require('../models/deliveryModel'); // MAKE SURE THIS PATH IS CORRECT
+const Order = require('../models/deliveryModel'); 
+const DriverLocation = require('../models/DriverLocation'); // Member 3 ගේ model එක
 
 // @desc    Create a new Order
-// @route   POST /api/deliveries
-// @access  Public
 const createDelivery = async (req, res) => {
   try {
-    // 1. We pass req.body directly because your Postman JSON keys 
-    //    now match the Mongoose Schema keys exactly (user_id, pickup_lat, etc.)
     const order = new Order(req.body);
-    
     const createdOrder = await order.save();
     res.status(201).json(createdOrder);
   } catch (error) {
-    // 2. Return the ACTUAL error message to see what is wrong
-    console.error(error);
     res.status(400).json({ message: error.message });
   }
 };
 
 // @desc    Get an Order by ID
-// @route   GET /api/deliveries/:id
-// @access  Public
 const getDeliveryById = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
@@ -34,25 +26,40 @@ const getDeliveryById = async (req, res) => {
   }
 };
 
-// @desc    Update an Order (Status, Driver, etc.)
-// @route   PUT /api/deliveries/:id
-// @access  Public
+// @desc    Get order details with driver's live location (NEW TRACKING LOGIC)
+const getOrderTracking = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ message: "Order not found" });
+
+    let driverLoc = null;
+    if (order.driver_id) {
+      // Member 3 ගේ table එකෙන් අලුත්ම location එක ගන්නවා
+      driverLoc = await DriverLocation.findOne({ driver_id: order.driver_id });
+    }
+    res.json({ order, driverLocation: driverLoc });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Update an Order
 const updateDelivery = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
-
     if (order) {
-      // 3. Update fields based on what is sent in the body
-      //    We use logical OR (||) to keep existing values if not sent
       order.driver_id = req.body.driver_id || order.driver_id;
       order.status = req.body.status || order.status;
       order.vehicle_type = req.body.vehicle_type || order.vehicle_type;
-      
-      // Update location/cost details if provided
       order.pickup_address = req.body.pickup_address || order.pickup_address;
       order.dropoff_address = req.body.dropoff_address || order.dropoff_address;
       order.total_cost = req.body.total_cost || order.total_cost;
-
+      order.is_delayed = req.body.is_delayed !== undefined ? req.body.is_delayed : order.is_delayed;
+      // updateDelivery function එක ඇතුළත මේ පේළි දෙක දාන්න
+      order.receiver_name = req.body.receiver_name || order.receiver_name;
+      order.receiver_phone = req.body.receiver_phone || order.receiver_phone;
+      order.receiver_email = req.body.receiver_email || order.receiver_email;
+      
       const updatedOrder = await order.save();
       res.json(updatedOrder);
     } else {
@@ -63,40 +70,21 @@ const updateDelivery = async (req, res) => {
   }
 };
 
-// @desc    Get orders with pagination & filtering
-// @route   GET /api/deliveries/my
-// @access  Public
+// @desc    Get My Deliveries
 const getMyDeliveries = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
   const skip = (page - 1) * limit;
-
   const query = {};
 
-  // Filter by User ID (Sender) or Driver ID if provided in query
-  if (req.query.user_id) {
-    query.user_id = req.query.user_id;
-  }
-  
-  // Filter by Status
-  if (req.query.status) {
-    query.status = req.query.status;
-  }
-
-  // Search logic (Updated to search 'dropoff_address' instead of old 'deliveryAddress')
-  if (req.query.search) {
-    query.dropoff_address = { $regex: req.query.search, $options: 'i' };
-  }
+  if (req.query.user_id) query.user_id = req.query.user_id;
+  if (req.query.status) query.status = req.query.status;
+  if (req.query.search) query.dropoff_address = { $regex: req.query.search, $options: 'i' };
 
   try {
-    const orders = await Order.find(query).skip(skip).limit(limit);
+    const orders = await Order.find(query).skip(skip).limit(limit).sort({created_at: -1});
     const count = await Order.countDocuments(query);
-    res.json({
-      orders, // Renamed from deliveries to orders
-      page,
-      pages: Math.ceil(count / limit),
-      count
-    });
+    res.json({ orders, page, pages: Math.ceil(count / limit), count });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -107,4 +95,5 @@ module.exports = {
   getDeliveryById,
   updateDelivery,
   getMyDeliveries,
+  getOrderTracking // Export කරන්න අමතක කරන්න එපා
 };
