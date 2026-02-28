@@ -1,14 +1,16 @@
 const bcrypt = require("bcryptjs");
 const { validationResult } = require("express-validator");
-const User = require("../models/User");
 const jwt = require("jsonwebtoken");
+const { OAuth2Client } = require("google-auth-library");
+
+const User = require("../models/User");
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // Register
 exports.register = async (req, res) => {
   const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
+  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
   const {
     full_name,
@@ -21,13 +23,9 @@ exports.register = async (req, res) => {
   } = req.body;
 
   try {
-    // Check email exists
     const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(409).json({ message: "Email already exists" });
-    }
+    if (existingUser) return res.status(409).json({ message: "Email already exists" });
 
-    // If driver, check required fields
     if (role === "driver") {
       if (!vehicle_type || !license_number) {
         return res.status(400).json({
@@ -36,11 +34,9 @@ exports.register = async (req, res) => {
       }
     }
 
-    // Hash password
     const salt = await bcrypt.genSalt(10);
     const password_hash = await bcrypt.hash(password, salt);
 
-    // Create user
     const newUser = await User.create({
       full_name,
       email,
@@ -50,9 +46,9 @@ exports.register = async (req, res) => {
       vehicle_type: role === "driver" ? vehicle_type : undefined,
       license_number: role === "driver" ? license_number : undefined,
       is_verified: role === "driver" ? false : true,
+      auth_provider: "local",
     });
 
-    // Generate token
     const token = jwt.sign(
       { id: newUser._id, role: newUser.role },
       process.env.JWT_SECRET,
@@ -78,33 +74,30 @@ exports.register = async (req, res) => {
 // Login
 exports.login = async (req, res) => {
   const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
+  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
   const { email, password } = req.body;
 
   try {
-    // 1) User exists?
     const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(401).json({ message: "Invalid email or password" });
+    if (!user) return res.status(401).json({ message: "Invalid email or password" });
+
+    //  Google users cannot login with password
+    if (user.auth_provider === "google") {
+      return res.status(400).json({
+        message: "This account uses Google Sign-In. Please continue with Google.",
+      });
     }
 
-    // 2) Password match?
     const ok = await bcrypt.compare(password, user.password_hash);
-    if (!ok) {
-      return res.status(401).json({ message: "Invalid email or password" });
-    }
+    if (!ok) return res.status(401).json({ message: "Invalid email or password" });
 
-    // 3) Token
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
 
-    // 4) Response
     return res.json({
       message: "Login successful",
       token,
@@ -118,5 +111,71 @@ exports.login = async (req, res) => {
     });
   } catch (error) {
     return res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+//  Google Login
+exports.googleLogin = async (req, res) => {
+  try {
+    const { credential } = req.body;
+    if (!credential) {
+      return res.status(400).json({ message: "Missing Google credential token" });
+    }
+
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    const email = payload?.email;
+    const name = payload?.name;
+    const googleId = payload?.sub;
+    const picture = payload?.picture;
+
+    if (!email || !googleId) {
+      return res.status(401).json({ message: "Google token invalid" });
+    }
+
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      user = await User.create({
+        full_name: name || "Google User",
+        email,
+        auth_provider: "google",
+        google_id: googleId,
+        avatar: picture,
+        role: "entrepreneur",
+        is_verified: true,
+      });
+    } else {
+      if (!user.google_id) user.google_id = googleId;
+      if (!user.avatar && picture) user.avatar = picture;
+      user.auth_provider = "google";
+      user.is_verified = true;
+      await user.save();
+    }
+
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    return res.json({
+      message: "Google login successful",
+      token,
+      user: {
+        id: user._id,
+        full_name: user.full_name,
+        email: user.email,
+        role: user.role,
+        is_verified: user.is_verified,
+      },
+    });
+  } catch (error) {
+    console.error("Google Login Error:", error);
+    return res.status(401).json({ message: "Google authentication failed" });
   }
 };

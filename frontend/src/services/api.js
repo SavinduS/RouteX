@@ -1,8 +1,17 @@
 import axios from 'axios';
 
 const API = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5003/api',
+    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5003/api',});
+
+API.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+
+  if (token) {
+    config.headers = config.headers || {};
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  return config;
 });
 
-// පස්සේ මෙතනට JWT token එක දාන්න පුළුවන්
 export default API;
