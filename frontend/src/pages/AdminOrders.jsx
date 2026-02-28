@@ -26,11 +26,12 @@ const AdminOrders = () => {
 
         // 1. Search Logic
         if (searchTerm) {
-            temp = temp.filter(o => 
-                o._id.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                o.pickup_address.toLowerCase().includes(searchTerm.toLowerCase())
-            );
-        }
+    temp = temp.filter(o => 
+        o._id.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        o.pickup_address.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        o.user_id?.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) // යූසර් නමෙන් සර්ච් කිරීම
+    );
+}
 
         // 2. Status Logic (For Active Tab only)
         if (activeTab === 'active' && statusFilter !== 'all') {
