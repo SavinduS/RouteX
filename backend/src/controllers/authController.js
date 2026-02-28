@@ -2,10 +2,30 @@ const bcrypt = require("bcryptjs");
 const { validationResult } = require("express-validator");
 const jwt = require("jsonwebtoken");
 const { OAuth2Client } = require("google-auth-library");
+const Counter = require("../models/Counter");
 
 const User = require("../models/User");
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+function prefixForRole(role) {
+  if (role === "entrepreneur") return "ENT";
+  if (role === "driver") return "DRV";
+  if (role === "admin") return "ADM";
+  return "USR";
+}
+
+async function generateUserCode(role) {
+  const counter = await Counter.findOneAndUpdate(
+    { _id: role },
+    { $inc: { seq: 1 } },
+    { new: true, upsert: true }
+  );
+
+  const prefix = prefixForRole(role);
+  const number = String(counter.seq).padStart(4, "0"); 
+  return `${prefix}${number}`; // ENT0001
+}
 
 // Register
 exports.register = async (req, res) => {
@@ -36,16 +56,18 @@ exports.register = async (req, res) => {
 
     const salt = await bcrypt.genSalt(10);
     const password_hash = await bcrypt.hash(password, salt);
+    const normalizedRole = role || "entrepreneur";
 
     const newUser = await User.create({
       full_name,
       email,
       phone_number,
       password_hash,
-      role,
-      vehicle_type: role === "driver" ? vehicle_type : undefined,
-      license_number: role === "driver" ? license_number : undefined,
-      is_verified: role === "driver" ? false : true,
+      role: normalizedRole,
+      user_id: await generateUserCode(normalizedRole), // <-- changed
+      vehicle_type: normalizedRole === "driver" ? vehicle_type : undefined,
+      license_number: normalizedRole === "driver" ? license_number : undefined,
+      is_verified: normalizedRole === "driver" ? false : true,
       auth_provider: "local",
     });
 
@@ -147,6 +169,7 @@ exports.googleLogin = async (req, res) => {
         google_id: googleId,
         avatar: picture,
         role: "entrepreneur",
+        user_id: await generateUserCode("entrepreneur"),
         is_verified: true,
       });
     } else {
