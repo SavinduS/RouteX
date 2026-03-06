@@ -16,16 +16,42 @@ const UserSchema = new mongoose.Schema(
       trim: true,
     },
 
+    // Optional for Google users
     phone_number: {
       type: String,
-      required: true,
+      required: function () {
+        return this.auth_provider !== "google";
+      },
       trim: true,
     },
 
-    // Never store plain password
+    // Optional for Google users
     password_hash: {
       type: String,
+      required: function () {
+        return this.auth_provider !== "google";
+      },
+    },
+
+    // Track how user signed up
+    auth_provider: {
+      type: String,
+      enum: ["local", "google"],
+      default: "local",
       required: true,
+    },
+
+    //Google unique id (sub)
+    google_id: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
+
+    //Optional avatar
+    avatar: {
+      type: String,
+      trim: true,
     },
 
     role: {
@@ -35,7 +61,6 @@ const UserSchema = new mongoose.Schema(
       default: "entrepreneur",
     },
 
-    // Driver-only fields
     vehicle_type: {
       type: String,
       enum: ["bike", "tuktuk", "van", "truck"],
@@ -50,17 +75,16 @@ const UserSchema = new mongoose.Schema(
         return this.role === "driver";
       },
       unique: true,
-      sparse: true, // important: avoids unique conflict for non-drivers (null values)
+      sparse: true,
       trim: true,
     },
 
     is_verified: {
       type: Boolean,
-      default: false, // driver register => false (admin verify later)
+      default: false,
     },
   },
   { timestamps: true }
 );
 
-//  Fix for OverwriteModelError with nodemon/hot reload
 module.exports = mongoose.models.User || mongoose.model("User", UserSchema);
