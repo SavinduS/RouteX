@@ -3,10 +3,10 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import Home from "./pages/Home";
 import Register from './pages/Register';
 import Login from './pages/Login';
-
 import ProtectedRoute from "./components/ProtectedRoute";
 import UserProfile from "./pages/UserProfile";
 
+// Admin Imports
 import AdminLayout from './components/AdminLayout';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminOrders from './pages/AdminOrders';
@@ -14,46 +14,48 @@ import AdminPricing from './pages/AdminPricing';
 import AdminCouriers from './pages/AdminCouriers';
 import AdminUsers from './pages/AdminUsers';
 
+// Entrepreneur Imports
+import EntrepreneurLayout from './components/EntrepreneurLayout'; 
 import EntrepreneurDashboard from "./pages/EntrepreneurDashboard";
 import MyDeliveries from "./pages/MyDeliveries";
 import CreateDelivery from "./pages/CreateDelivery";
 import TrackOrder from "./pages/TrackOrder"; 
 
-// Sidebar එක පෙන්වීමට Layout එක (අමතක වූවා නම් import කරගන්න)
-import EntrepreneurLayout from './components/EntrepreneurLayout'; 
-
+// Admin Protection Component
 function AdminRoute({ children }) {
   const token = localStorage.getItem("token");
   const storedUser = localStorage.getItem("user");
-
-  if (!token || !storedUser) {
-    return <Navigate to="/login" replace />;
-  }
-
+  if (!token || !storedUser) return <Navigate to="/login" replace />;
   try {
     const user = JSON.parse(storedUser);
-    if (user?.role !== "admin") {
-      return <Navigate to="/" replace />;
-    }
+    return user?.role === "admin" ? children : <Navigate to="/" replace />;
   } catch {
     return <Navigate to="/login" replace />;
   }
-
-  return children;
 }
-// Entrepreneur Pages
 
+// Entrepreneur Protection Component (අලුතින් එකතු කළා)
+function EntrepreneurRoute({ children }) {
+  const token = localStorage.getItem("token");
+  const storedUser = localStorage.getItem("user");
+  if (!token || !storedUser) return <Navigate to="/login" replace />;
+  try {
+    const user = JSON.parse(storedUser);
+    return user?.role === "entrepreneur" ? children : <Navigate to="/" replace />;
+  } catch {
+    return <Navigate to="/login" replace />;
+  }
+}
 
 function App() {
   return (
     <Routes>
-      {/* Home */}
+      {/* 1. Public Routes */}
       <Route path="/" element={<Home />} />
-
-      {/* Auth Routes */}
       <Route path="/register" element={<Register />} />
       <Route path="/login" element={<Login />} />
 
+      {/* 2. Logged-in User Profile */}
       <Route
         path="/profile"
         element={
@@ -63,14 +65,14 @@ function App() {
         }
       />
 
-      {/* Admin Routes */}
-       <Route
+      {/* 3. Admin Routes (Protected) */}
+      <Route
         path="/admin"
-        element={(
+        element={
           <AdminRoute>
             <AdminLayout />
           </AdminRoute>
-        )}
+        }
       >
         <Route index element={<AdminDashboard />} />
         <Route path="orders" element={<AdminOrders />} />
@@ -78,19 +80,24 @@ function App() {
         <Route path="couriers" element={<AdminCouriers />} />
         <Route path="entrepreneurs" element={<AdminUsers />} />
       </Route>
-      */}
-      
-      {/* 2. Entrepreneur Section - Sidebar එක සහිත Layout එක භාවිතා කර ඇත */}
-      <Route path="/entrepreneur" element={<EntrepreneurLayout />}>
-        {/* /entrepreneur ලෙස ආ විට Dashboard එක පෙන්වයි */}
-        <Route index element={<EntrepreneurDashboard />} /> 
+
+      {/* 4. Entrepreneur Routes (Protected & Layout Attached) */}
+      <Route
+        path="/entrepreneur"
+        element={
+          <EntrepreneurRoute>
+            <EntrepreneurLayout />
+          </EntrepreneurRoute>
+        }
+      >
+        <Route index element={<EntrepreneurDashboard />} />
         <Route path="dashboard" element={<EntrepreneurDashboard />} />
         <Route path="my-deliveries" element={<MyDeliveries />} />
         <Route path="create-delivery" element={<CreateDelivery />} />
         <Route path="track/:id" element={<TrackOrder />} />
       </Route>
 
-      {/* වැරදි URL එකක් ගැහුවොත් Home එකට Navigate කිරීම */}
+      {/* Fallback */}
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   );

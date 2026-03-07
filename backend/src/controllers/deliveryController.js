@@ -1,13 +1,9 @@
-const Order = require('../models/deliveryModel'); 
-const DriverLocation = require('../models/DriverLocation'); // Member 3 ගේ model එක
+const Order = require('../models/deliveryModel');
+const DriverLocation = require('../models/DriverLocation');
 
-// @desc    Create a new Order
+// @desc    Create a new delivery request
+// @route   POST /api/deliveries
 const createDelivery = async (req, res) => {
-  try {
-    const order = new Order(req.body);
-    const createdOrder = await order.save();
-    res.status(201).json(createdOrder);
-  } catch (error) {
     res.status(400).json({ message: error.message });
   }
 };
@@ -20,13 +16,20 @@ const getDeliveryById = async (req, res) => {
       res.json(order);
     } else {
       res.status(404).json({ message: 'Order not found' });
+// @desc    Get all deliveries for the logged-in Entrepreneur
+// @route   GET /api/deliveries/my
+const getMyDeliveries = async (req, res) => {
+    try {
+        // Strict ownership filtering: Only fetch orders where user_id matches token ID
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-// @desc    Get order details with driver's live location (NEW TRACKING LOGIC)
+// @desc    Get specific order details and tracking info
 const getOrderTracking = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
@@ -36,6 +39,13 @@ const getOrderTracking = async (req, res) => {
     if (order.driver_id) {
       // Member 3 ගේ table එකෙන් අලුත්ම location එක ගන්නවා
       driverLoc = await DriverLocation.findOne({ driver_id: order.driver_id });
+        // Verify ownership
+        if (order.user_id.toString() !== req.user.id) {
+            return res.status(401).json({ message: "Access denied" });
+        }
+
+        let driverLoc = null;
+        if (order.driver_id) {
     }
     res.json({ order, driverLocation: driverLoc });
   } catch (error) {
@@ -49,7 +59,6 @@ const updateDelivery = async (req, res) => {
     const order = await Order.findById(req.params.id);
     if (order) {
       order.driver_id = req.body.driver_id || order.driver_id;
-      order.status = req.body.status || order.status;
       order.vehicle_type = req.body.vehicle_type || order.vehicle_type;
       order.pickup_address = req.body.pickup_address || order.pickup_address;
       order.dropoff_address = req.body.dropoff_address || order.dropoff_address;
@@ -63,9 +72,15 @@ const updateDelivery = async (req, res) => {
       const updatedOrder = await order.save();
       res.json(updatedOrder);
     } else {
-      res.status(404).json({ message: 'Order not found' });
+        }
+        // Update fields
+        order.receiver_name = req.body.receiver_name || order.receiver_name;
+        order.receiver_phone = req.body.receiver_phone || order.receiver_phone;
+        order.receiver_email = req.body.receiver_email || order.receiver_email;
+
+    } catch (error) {
+        res.status(400).json({ message: error.message });
     }
-  } catch (error) {
     res.status(400).json({ message: error.message });
   }
 };
@@ -75,25 +90,18 @@ const getMyDeliveries = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
   const skip = (page - 1) * limit;
-  const query = {};
-
-  if (req.query.user_id) query.user_id = req.query.user_id;
-  if (req.query.status) query.status = req.query.status;
-  if (req.query.search) query.dropoff_address = { $regex: req.query.search, $options: 'i' };
-
-  try {
-    const orders = await Order.find(query).skip(skip).limit(limit).sort({created_at: -1});
-    const count = await Order.countDocuments(query);
-    res.json({ orders, page, pages: Math.ceil(count / limit), count });
-  } catch (error) {
     res.status(500).json({ message: error.message });
   }
+        res.json({ message: "Delivery request deleted successfully" });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
 };
 
 module.exports = {
-  createDelivery,
-  getDeliveryById,
-  updateDelivery,
-  getMyDeliveries,
-  getOrderTracking // Export කරන්න අමතක කරන්න එපා
+    createDelivery,
+    getMyDeliveries,
+    getOrderTracking,
+    updateDelivery,
+    deleteDelivery
 };
