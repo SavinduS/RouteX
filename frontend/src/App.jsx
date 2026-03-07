@@ -1,6 +1,7 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from "react-router-dom";
 
 import Home from "./pages/Home";
+
 import Register from './pages/Register';
 import Login from './pages/Login';
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -14,14 +15,18 @@ import AdminPricing from './pages/AdminPricing';
 import AdminCouriers from './pages/AdminCouriers';
 import AdminUsers from './pages/AdminUsers';
 
+
 // Entrepreneur Imports
 import EntrepreneurLayout from './components/EntrepreneurLayout'; 
 import EntrepreneurDashboard from "./pages/EntrepreneurDashboard";
 import MyDeliveries from "./pages/MyDeliveries";
 import CreateDelivery from "./pages/CreateDelivery";
-import TrackOrder from "./pages/TrackOrder"; 
+import TrackOrder from "./pages/TrackOrder";
 
-// Admin Protection Component
+
+// Sidebar එක පෙන්වීමට Layout එක (අමතක වූවා නම් import කරගන්න)
+import EntrepreneurLayout from "./components/EntrepreneurLayout";
+
 function AdminRoute({ children }) {
   const token = localStorage.getItem("token");
   const storedUser = localStorage.getItem("user");
@@ -47,6 +52,9 @@ function EntrepreneurRoute({ children }) {
   }
 }
 
+// Entrepreneur Pages
+
+
 function App() {
   return (
     <Routes>
@@ -65,7 +73,9 @@ function App() {
         }
       />
 
-      {/* 3. Admin Routes (Protected) */}
+
+      {/* Admin Routes */}
+
       <Route
         path="/admin"
         element={
@@ -81,6 +91,7 @@ function App() {
         <Route path="entrepreneurs" element={<AdminUsers />} />
       </Route>
 
+
       {/* 4. Entrepreneur Routes (Protected & Layout Attached) */}
       <Route
         path="/entrepreneur"
@@ -90,6 +101,7 @@ function App() {
           </EntrepreneurRoute>
         }
       >
+
         <Route index element={<EntrepreneurDashboard />} />
         <Route path="dashboard" element={<EntrepreneurDashboard />} />
         <Route path="my-deliveries" element={<MyDeliveries />} />
