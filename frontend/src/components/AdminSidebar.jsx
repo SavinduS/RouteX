@@ -1,13 +1,25 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom'; // 1. useNavigate import කරන්න
 import { LayoutDashboard, ShoppingCart, Users, UserCheck, Settings, LogOut, Navigation } from 'lucide-react';
 
 const AdminSidebar = () => {
+    const navigate = useNavigate(); // 2. Navigate function එක ලෑස්ති කරගන්න
+
     const navLinkClasses = ({ isActive }) =>
         `flex items-center space-x-3 p-4 mx-3 rounded-2xl transition-all duration-300 group ${
             isActive
                 ? 'bg-[#A5D6A7] text-[#1B5E20] shadow-lg shadow-black/10 font-bold'
                 : 'text-white/70 hover:bg-white/10 hover:text-white'
         }`;
+
+    // 3. Logout Function එක
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.dispatchEvent(new Event("storage"));
+        
+        // සාර්ථකව Logout වුණු බව හැඟවීමට root එකට (Login page එකට) යැවීම
+        navigate('/'); 
+    };
 
     return (
         <div className="h-full w-64 bg-[#1B5E20] text-white flex flex-col shadow-2xl">
@@ -38,10 +50,13 @@ const AdminSidebar = () => {
                 </NavLink>
             </nav>
 
-            {/* Bottom Section */}
+            {/* Bottom Section - මෙතන තමයි onClick එක දාන්නේ */}
             <div className="p-6 mt-auto border-t border-white/10">
-                <button className="flex items-center space-x-3 p-4 w-full rounded-2xl text-red-300 hover:bg-red-500/10 hover:text-red-400 transition-all font-bold text-sm">
-                    <LogOut size={18} /> <span>System Logout</span>
+                <button 
+                    onClick={handleLogout} // 4. Function එක මෙතනට ලින්ක් කරන්න
+                    className="flex items-center space-x-3 p-4 w-full rounded-2xl text-red-300 hover:bg-red-500/10 hover:text-red-400 transition-all font-bold text-sm"
+                >
+                    <LogOut size={18} /> <span>Logout</span>
                 </button>
             </div>
         </div>
