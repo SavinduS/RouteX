@@ -1,4 +1,5 @@
 const axios = require('axios'); // For OSRM API calls
+const axios = require('axios'); // For OSRM API calls
 const Order = require('../models/deliveryModel'); 
 const DriverLocation = require('../models/DriverLocation'); // Member 3's Model
 
@@ -61,6 +62,7 @@ const createDelivery = async (req, res) => {
 
     const order = new Order(orderData);
     const createdOrder = await order.save();
+    
     
     res.status(201).json(createdOrder);
 
@@ -137,6 +139,7 @@ const updateDelivery = async (req, res) => {
       order.receiver_phone = req.body.receiver_phone || order.receiver_phone;
       order.receiver_email = req.body.receiver_email || order.receiver_email;
       order.status = req.body.status || order.status;
+      order.status = req.body.status || order.status;
       
       const updatedOrder = await order.save();
       res.json(updatedOrder);
@@ -154,4 +157,5 @@ module.exports = {
   updateDelivery,
   getMyDeliveries,
   getOrderTracking
+  
 };
