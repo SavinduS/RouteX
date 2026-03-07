@@ -24,8 +24,7 @@ import CreateDelivery from "./pages/CreateDelivery";
 import TrackOrder from "./pages/TrackOrder";
 
 
-// Sidebar එක පෙන්වීමට Layout එක (අමතක වූවා නම් import කරගන්න)
-import EntrepreneurLayout from "./components/EntrepreneurLayout";
+
 
 function AdminRoute({ children }) {
   const token = localStorage.getItem("token");
