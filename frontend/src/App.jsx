@@ -1,26 +1,26 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from "react-router-dom";
 
 import Home from "./pages/Home";
-import Register from './pages/Register';
-import Login from './pages/Login';
+import Register from "./pages/Register";
+import Login from "./pages/Login";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import UserProfile from "./pages/UserProfile";
 
-import AdminLayout from './components/AdminLayout';
-import AdminDashboard from './pages/AdminDashboard';
-import AdminOrders from './pages/AdminOrders';
-import AdminPricing from './pages/AdminPricing';
-import AdminCouriers from './pages/AdminCouriers';
-import AdminUsers from './pages/AdminUsers';
+import AdminLayout from "./components/AdminLayout";
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminOrders from "./pages/AdminOrders";
+import AdminPricing from "./pages/AdminPricing";
+import AdminCouriers from "./pages/AdminCouriers";
+import AdminUsers from "./pages/AdminUsers";
 
 import EntrepreneurDashboard from "./pages/EntrepreneurDashboard";
 import MyDeliveries from "./pages/MyDeliveries";
 import CreateDelivery from "./pages/CreateDelivery";
-import TrackOrder from "./pages/TrackOrder"; 
+import TrackOrder from "./pages/TrackOrder";
 
 // Sidebar එක පෙන්වීමට Layout එක (අමතක වූවා නම් import කරගන්න)
-import EntrepreneurLayout from './components/EntrepreneurLayout'; 
+import EntrepreneurLayout from "./components/EntrepreneurLayout";
 
 function AdminRoute({ children }) {
   const token = localStorage.getItem("token");
@@ -43,7 +43,6 @@ function AdminRoute({ children }) {
 }
 // Entrepreneur Pages
 
-
 function App() {
   return (
     <Routes>
@@ -64,13 +63,13 @@ function App() {
       />
 
       {/* Admin Routes */}
-       <Route
+      <Route
         path="/admin"
-        element={(
+        element={
           <AdminRoute>
             <AdminLayout />
           </AdminRoute>
-        )}
+        }
       >
         <Route index element={<AdminDashboard />} />
         <Route path="orders" element={<AdminOrders />} />
@@ -78,12 +77,11 @@ function App() {
         <Route path="couriers" element={<AdminCouriers />} />
         <Route path="entrepreneurs" element={<AdminUsers />} />
       </Route>
-      */}
-      
+
       {/* 2. Entrepreneur Section - Sidebar එක සහිත Layout එක භාවිතා කර ඇත */}
       <Route path="/entrepreneur" element={<EntrepreneurLayout />}>
         {/* /entrepreneur ලෙස ආ විට Dashboard එක පෙන්වයි */}
-        <Route index element={<EntrepreneurDashboard />} /> 
+        <Route index element={<EntrepreneurDashboard />} />
         <Route path="dashboard" element={<EntrepreneurDashboard />} />
         <Route path="my-deliveries" element={<MyDeliveries />} />
         <Route path="create-delivery" element={<CreateDelivery />} />
