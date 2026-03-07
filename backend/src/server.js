@@ -5,6 +5,7 @@ const mongoose = require("mongoose");
 const http = require("http");
 const { Server } = require("socket.io");
 const { initNotification } = require("./utils/notificationService");
+const socketHandler = require("./sockets/socketHandler");
 
 // Configuration
 dotenv.config();
@@ -34,27 +35,49 @@ app.use(
   cors({
     origin: [CLIENT_URL],
     credentials: true,
-  })
+  }),
 );
 
 // Middleware
-app.use(express.json()); // Body parser (JSON data කියවන්න)
+app.use(express.json()); // Body parser
 app.use("/api/test", require("./routes/testRoutes"));
 
-const adminRoutes = require('./routes/adminRoutes');
-app.use('/api/admin', adminRoutes);
+const adminRoutes = require("./routes/adminRoutes");
+app.use("/api/admin", adminRoutes);
 
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/users", require("./routes/userRoutes"));
 
 const inquiryRoutes = require("./routes/inquiryRoutes");
+app.use("/api/inquiries", inquiryRoutes);
 
-// Basic Route (වැඩද කියලා බලන්න)
+const deliveryRoutes = require("./routes/deliveryRoutes");
+app.use("/api/deliveries", deliveryRoutes);
+
+const driverRoutes = require("./routes/driverRoutes");
+app.use("/api/driver", driverRoutes);
+
+// Notification routes
+const notificationRoutes = require("./routes/notificationRoutes");
+app.use("/api/notifications", notificationRoutes);
+
+// Basic Route
 app.get("/", (req, res) => {
   res.send("RouteX Backend API is Running...");
 });
 
-// Database Connection
+// 1. Initialize Socket.io on the server
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+  },
+});
+
+// 2. Pass the 'io' object to your separate file
+socketHandler(io);
+
+// Database Connection and Server Start
 const PORT = process.env.PORT || 5003;
 mongoose
   .connect(process.env.MONGO_URI)
@@ -68,14 +91,3 @@ mongoose
     console.error("❌ MongoDB Connection Failed:", err.message);
   });
 
-// API Routes
-const deliveryRoutes = require("./routes/deliveryRoutes");
-app.use("/api/deliveries", deliveryRoutes);
-app.use("/api/inquiries", inquiryRoutes);
-
-const driverRoutes = require("./routes/driverRoutes");
-app.use("/api/driver", driverRoutes);
-
-// Notification routes
-const notificationRoutes = require("./routes/notificationRoutes");
-app.use("/api/notifications", notificationRoutes);

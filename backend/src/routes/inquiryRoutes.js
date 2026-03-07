@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const { sendInquiry } = require("../controllers/inquiryController");
-const auth = require("../middleware/auth"); // ඔබේ Middleware එකේ path එක නිවැරදිව දෙන්න
+const auth = require("../middleware/auth");
+const role = require("../middleware/role");
 
-// POST /api/inquiries
-router.post("/", auth, sendInquiry);
+
+router.post("/", auth, role('entrepreneur'), sendInquiry);
 
 module.exports = router;
