@@ -4,7 +4,6 @@ const DriverLocation = require('../models/DriverLocation'); // Member 3's Model
 
 /** 
  * IMPORTANT: Import the Admin's Pricing Logic without modifying it.
- * This ensures compliance with the business rules set by the Admin.
  */
 const { calculateFare } = require('../utils/pricingLogic'); 
 
@@ -33,13 +32,13 @@ const createDelivery = async (req, res) => {
      * 2. ADMIN PRICING RULES
      */
     const activePricingRule = {
-        base_fare: 100,           
-        per_km_rate: 50,          
+        base_fare: 100,           // LKR
+        per_km_rate: 50,          // LKR per KM
         small_multiplier: 1.0,
         medium_multiplier: 1.2,
         large_multiplier: 1.5,
-        driver_cut_percent: 80,   
-        platform_cut_percent: 20  
+        driver_cut_percent: 80,   // Driver gets 80%
+        platform_cut_percent: 20  // Platform takes 20%
     };
 
     /**
@@ -49,11 +48,10 @@ const createDelivery = async (req, res) => {
 
     /**
      * 4. SAVE ORDER DATA
-     * We use req.user.id (provided by auth middleware) to link the order to the creator.
      */
     const orderData = {
       ...req.body,
-      user_id: req.user ? req.user.id : req.body.user_id, // Use authenticated user ID
+      user_id: req.user ? req.user.id : req.body.user_id, // Get ID from JWT if available
       distance_km: fare.distance_km,
       total_cost: fare.total_cost,
       driver_earnings: fare.driver_earnings,
@@ -68,24 +66,22 @@ const createDelivery = async (req, res) => {
 
   } catch (error) {
     console.error("Backend Error (CreateDelivery):", error.message);
-    res.status(500).json({ message: "Failed to create delivery: " + error.message });
+    res.status(500).json({ message: "Creation failed: " + error.message });
   }
 };
 
-// @desc    Get single order by ID
-// @route   GET /api/deliveries/:id
+// @desc    Get order details by ID
 const getDeliveryById = async (req, res) => {
-    try {
-        const order = await Order.findById(req.params.id);
-        if (!order) return res.status(404).json({ message: "Order not found" });
-        res.json(order);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ message: "Order not found" });
+    res.json(order);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 // @desc    Get order details with Latest Driver Live Location
-// @route   GET /api/deliveries/:id/track
 const getOrderTracking = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
@@ -93,10 +89,6 @@ const getOrderTracking = async (req, res) => {
 
     let driverLoc = null;
     if (order.driver_id) {
-      /**
-       * INTEGRATION WITH MEMBER 3:
-       * Fetch the most recent coordinate for the assigned driver.
-       */
       driverLoc = await DriverLocation.findOne({ driver_id: order.driver_id })
                                      .sort({ recorded_at: -1 }); 
     }
@@ -107,23 +99,19 @@ const getOrderTracking = async (req, res) => {
 };
 
 // @desc    Get My Deliveries (For Entrepreneur Dashboard)
-// @route   GET /api/deliveries/my
 const getMyDeliveries = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
   const skip = (page - 1) * limit;
   const query = {};
 
-  // Filters
-  if (req.user && req.user.id) query.user_id = req.user.id;
-  else if (req.query.user_id) query.user_id = req.query.user_id;
-
+  if (req.query.user_id) query.user_id = req.query.user_id;
   if (req.query.status) query.status = req.query.status;
   
   if (req.query.search) {
       query.$or = [
           { dropoff_address: { $regex: req.query.search, $options: 'i' } },
-          { receiver_name: { $regex: req.query.search, $options: 'i' } }
+          { order_id: { $regex: req.query.search, $options: 'i' } }
       ];
   }
 
@@ -131,27 +119,20 @@ const getMyDeliveries = async (req, res) => {
     const orders = await Order.find(query)
                              .skip(skip)
                              .limit(limit)
-                             .sort({ createdAt: -1 });
+                             .sort({ created_at: -1 });
                              
     const count = await Order.countDocuments(query);
-    res.json({ 
-        orders, 
-        page, 
-        pages: Math.ceil(count / limit), 
-        total: count 
-    });
+    res.json({ orders, page, pages: Math.ceil(count / limit), total: count });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
 // @desc    Update an Order (General info update)
-// @route   PUT /api/deliveries/:id
 const updateDelivery = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
     if (order) {
-      // Update non-financial fields only
       order.receiver_name = req.body.receiver_name || order.receiver_name;
       order.receiver_phone = req.body.receiver_phone || order.receiver_phone;
       order.receiver_email = req.body.receiver_email || order.receiver_email;
