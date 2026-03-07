@@ -4,6 +4,7 @@ const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const http = require("http");
 const { Server } = require("socket.io");
+const { initNotification } = require("./utils/notificationService");
 const socketHandler = require("./sockets/socketHandler");
 
 // Configuration
@@ -12,6 +13,23 @@ const app = express();
 const server = http.createServer(app);
 
 const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:5173";
+
+const io = new Server(server, {
+  cors: {
+    origin: [CLIENT_URL],
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
+});
+
+initNotification(io);
+
+io.on("connection", (socket) => {
+  console.log("A user connected:", socket.id);
+  socket.on("disconnect", () => {
+    console.log("User disconnected:", socket.id);
+  });
+});
 
 app.use(
   cors({
@@ -38,6 +56,10 @@ app.use("/api/deliveries", deliveryRoutes);
 
 const driverRoutes = require("./routes/driverRoutes");
 app.use("/api/driver", driverRoutes);
+
+// Notification routes
+const notificationRoutes = require("./routes/notificationRoutes");
+app.use("/api/notifications", notificationRoutes);
 
 // Basic Route
 app.get("/", (req, res) => {
@@ -68,3 +90,4 @@ mongoose
   .catch((err) => {
     console.error("❌ MongoDB Connection Failed:", err.message);
   });
+

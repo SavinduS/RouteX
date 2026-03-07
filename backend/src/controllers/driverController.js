@@ -129,6 +129,7 @@ exports.updateOrderStatus = async (req, res) => {
 
       const historyRecord = new DeliveryHistory({
         order_id: order._id,
+        readable_order_id: order.order_id, // e.g. ODR-260227-001
         user_id: order.user_id,
         driver_id: order.driver_id,
         final_status: "delivered",

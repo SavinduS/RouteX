@@ -27,6 +27,8 @@ const AdminOrders = () => {
         // 1. Search Logic
         if (searchTerm) {
     temp = temp.filter(o => 
+        (o.order_id && o.order_id.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (o.readable_order_id && o.readable_order_id.toLowerCase().includes(searchTerm.toLowerCase())) ||
         o._id.toLowerCase().includes(searchTerm.toLowerCase()) || 
         o.pickup_address.toLowerCase().includes(searchTerm.toLowerCase()) ||
         o.user_id?.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) // යූසර් නමෙන් සර්ච් කිරීම
@@ -187,7 +189,7 @@ const AdminOrders = () => {
                             {filteredOrders.map(order => (
                                 <tr key={order._id} className="hover:bg-gray-50/50 transition-colors group">
                                     <td className="p-6">
-                                        <div className="font-black text-gray-900 text-sm">#{order._id.slice(-6).toUpperCase()}</div>
+                                        <div className="font-black text-gray-900 text-sm">#{order.readable_order_id || order.order_id || order._id}</div>
                                         <div className="text-[10px] text-gray-400 font-bold mt-1 uppercase tracking-tighter">
                                             {new Date(order.created_at || order.completed_at).toDateString()}
                                         </div>
@@ -241,7 +243,7 @@ const AdminOrders = () => {
                             <button onClick={() => setSelectedOrder(null)} className="absolute right-6 top-6 p-2 hover:bg-gray-100 rounded-full text-gray-400 transition-colors"><X size={24}/></button>
                             <div className="bg-[#1B5E20] p-10 text-white">
                                 <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-60 mb-2">Order Summary</p>
-                                <h3 className="text-3xl font-black">#{selectedOrder._id.toUpperCase()}</h3>
+                                <h3 className="text-3xl font-black">#{selectedOrder.readable_order_id || selectedOrder.order_id || selectedOrder._id}</h3>
                             </div>
                             <div className="p-10 space-y-8">
                                 <div className="grid grid-cols-2 gap-8">

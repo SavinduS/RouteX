@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 
 const deliveryHistorySchema = new mongoose.Schema({
   order_id: { type: mongoose.Schema.Types.ObjectId, required: true },
+  readable_order_id: { type: String, required: true },
   user_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",

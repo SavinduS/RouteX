@@ -12,6 +12,15 @@ const sendInquiry = async (req, res) => {
     });
 
     const savedInquiry = await inquiry.save();
+
+    const { sendNotification } = require("../utils/notificationService");
+    await sendNotification({
+      type: "new_inquiry",
+      message: `New Inquiry from user: ${subject}`,
+      relatedId: savedInquiry._id,
+      relatedModel: "Inquiry",
+    });
+
     res.status(201).json({ success: true, data: savedInquiry });
     
   } catch (error) {
