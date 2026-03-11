@@ -1,44 +1,22 @@
 // src/components/MapComponent.jsx
-import React, { useEffect } from "react";
-import {
-  MapContainer,
-  TileLayer,
-  Marker,
-  Popup,
-  Polyline,
-  useMap,
-} from "react-leaflet";
-import L from "leaflet";
+import React, { useEffect, useState, useRef } from "react";
+import Map, { Marker, Source, Layer } from "react-map-gl/maplibre";
+import "maplibre-gl/dist/maplibre-gl.css";
+import axios from "axios";
 
-// Custom Map Icons
-const driverIcon = new L.Icon({
-  iconUrl: "https://cdn-icons-png.flaticon.com/512/3206/3206203.png",
-  iconSize: [35, 35],
-});
+// --- GET API KEYS FROM .ENV ---
+// If using Vite:
+const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_API_KEY;
+const ORS_KEY = import.meta.env.VITE_ORS_API_KEY;
 
-const destinationIcon = new L.Icon({
-  iconUrl: "https://cdn-icons-png.flaticon.com/512/684/684908.png",
-  iconSize: [35, 35],
-});
-
-// Helper component to auto-adjust map bounds to show driver and destination
-const MapBounds = ({ driverLoc, destLoc }) => {
-  const map = useMap();
-  useEffect(() => {
-    if (driverLoc && destLoc) {
-      const bounds = L.latLngBounds([
-        [driverLoc.lat, driverLoc.lng],
-        [destLoc.lat, destLoc.lng],
-      ]);
-      map.fitBounds(bounds, { padding: [50, 50] });
-    } else if (driverLoc) {
-      map.setView([driverLoc.lat, driverLoc.lng], 14);
-    }
-  }, [driverLoc, destLoc, map]);
-  return null;
-};
+// If using Create React App (uncomment below and delete the Vite ones above):
+// const MAPTILER_KEY = process.env.REACT_APP_MAPTILER_API_KEY;
+// const ORS_KEY = process.env.REACT_APP_ORS_API_KEY;
 
 const MapComponent = ({ driverLocation, selectedOrder }) => {
+  const mapRef = useRef(null);
+  const [routeData, setRouteData] = useState(null);
+
   // Determine Destination based on Order Status
   let destination = null;
   let destinationAddress = "";
@@ -49,63 +27,134 @@ const MapComponent = ({ driverLocation, selectedOrder }) => {
         lat: selectedOrder.pickup_lat,
         lng: selectedOrder.pickup_lng,
       };
-      destinationAddress = selectedOrder.pickup_address;
+      destinationAddress = "Pickup: " + selectedOrder.pickup_address;
     } else if (["picked_up", "in_transit"].includes(selectedOrder.status)) {
       destination = {
         lat: selectedOrder.dropoff_lat,
         lng: selectedOrder.dropoff_lng,
       };
-      destinationAddress = selectedOrder.dropoff_address;
+      destinationAddress = "Drop-off: " + selectedOrder.dropoff_address;
     }
   }
 
-  const defaultCenter = [6.9271, 79.8612]; // Default to Colombo (Change as needed)
-  const center = driverLocation
-    ? [driverLocation.lat, driverLocation.lng]
-    : defaultCenter;
+  // Fetch Route from OpenRouteService when locations change
+  useEffect(() => {
+    if (!driverLocation || !destination) {
+      setRouteData(null);
+      // Just center on driver if no destination
+      if (driverLocation && mapRef.current) {
+        mapRef.current.flyTo({
+          center: [driverLocation.lng, driverLocation.lat],
+          zoom: 14,
+          duration: 1000,
+        });
+      }
+      return;
+    }
+
+    const fetchRoute = async () => {
+      try {
+        // ORS expects coordinates in [longitude, latitude] format
+        const start = `${driverLocation.lng},${driverLocation.lat}`;
+        const end = `${destination.lng},${destination.lat}`;
+
+        const response = await axios.get(
+          `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${ORS_KEY}&start=${start}&end=${end}`,
+        );
+
+        const feature = response.data.features[0];
+        setRouteData(feature);
+
+        // Adjust map bounds to perfectly fit the entire route
+        if (mapRef.current && feature.bbox) {
+          const [minLng, minLat, maxLng, maxLat] = feature.bbox;
+          mapRef.current.fitBounds(
+            [
+              [minLng, minLat],
+              [maxLng, maxLat],
+            ],
+            { padding: 50, duration: 1000 },
+          );
+        }
+      } catch (error) {
+        console.error("Failed to fetch route from ORS:", error);
+      }
+    };
+
+    fetchRoute();
+  }, [driverLocation, destination]);
 
   return (
-    <div className="w-full h-full min-h-[400px] rounded-lg overflow-hidden border shadow-sm">
-      <MapContainer
-        center={center}
-        zoom={13}
-        style={{ height: "100%", width: "100%" }}
+    <div className="w-full h-full min-h-[400px] rounded-lg overflow-hidden border shadow-sm relative">
+      <Map
+        ref={mapRef}
+        initialViewState={{
+          longitude: driverLocation?.lng || 79.8612, // Default: Colombo
+          latitude: driverLocation?.lat || 6.9271,
+          zoom: 13,
+        }}
+        // Using MapTiler street style
+        mapStyle={`https://api.maptiler.com/maps/streets-v2/style.json?key=${MAPTILER_KEY}`}
+        style={{ width: "100%", height: "100%" }}
       >
-        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+        {/* Draw Navigation Line (Real Roads via ORS) */}
+        {routeData && (
+          <Source id="route-source" type="geojson" data={routeData}>
+            <Layer
+              id="route-layer"
+              type="line"
+              layout={{
+                "line-join": "round",
+                "line-cap": "round",
+              }}
+              paint={{
+                "line-color": "#3b82f6", // Tailwind blue-500
+                "line-width": 5,
+              }}
+            />
+          </Source>
+        )}
 
+        {/* Driver Marker */}
         {driverLocation && (
           <Marker
-            position={[driverLocation.lat, driverLocation.lng]}
-            icon={driverIcon}
+            longitude={driverLocation.lng}
+            latitude={driverLocation.lat}
+            anchor="bottom"
           >
-            <Popup>You are here</Popup>
+            <div className="flex flex-col items-center cursor-pointer group">
+              <div className="bg-black text-white text-xs px-2 py-1 rounded shadow-md mb-1 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                You are here
+              </div>
+              <img
+                src="https://cdn-icons-png.flaticon.com/512/3206/3206203.png"
+                alt="Driver"
+                className="w-10 h-10 drop-shadow-md"
+              />
+            </div>
           </Marker>
         )}
 
+        {/* Destination Marker */}
         {destination && (
           <Marker
-            position={[destination.lat, destination.lng]}
-            icon={destinationIcon}
+            longitude={destination.lng}
+            latitude={destination.lat}
+            anchor="bottom"
           >
-            <Popup>{destinationAddress}</Popup>
+            <div className="flex flex-col items-center cursor-pointer group">
+              <div className="bg-blue-600 text-white text-xs px-2 py-1 rounded shadow-md mb-1 opacity-100 whitespace-nowrap">
+                {destinationAddress}
+              </div>
+              <img
+                src="https://cdn-icons-png.flaticon.com/512/684/684908.png"
+                alt="Destination"
+                className="w-10 h-10 drop-shadow-md"
+              />
+            </div>
           </Marker>
         )}
-
-        {/* Draw Navigation Line */}
-        {driverLocation && destination && (
-          <Polyline
-            positions={[
-              [driverLocation.lat, driverLocation.lng],
-              [destination.lat, destination.lng],
-            ]}
-            color="blue"
-            weight={4}
-            dashArray="10, 10"
-          />
-        )}
-
-        <MapBounds driverLoc={driverLocation} destLoc={destination} />
-      </MapContainer>
+      </Map>
     </div>
   );
 };
