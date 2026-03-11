@@ -1,31 +1,30 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 
 import Home from "./pages/Home";
-
-import Register from './pages/Register';
-import Login from './pages/Login';
+import Register from "./pages/Register";
+import Login from "./pages/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
 import UserProfile from "./pages/UserProfile";
 
 // Admin Imports
-import AdminLayout from './components/AdminLayout';
-import AdminDashboard from './pages/AdminDashboard';
-import AdminOrders from './pages/AdminOrders';
-import AdminPricing from './pages/AdminPricing';
-import AdminCouriers from './pages/AdminCouriers';
-import AdminUsers from './pages/AdminUsers';
-
+import AdminLayout from "./components/AdminLayout";
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminOrders from "./pages/AdminOrders";
+import AdminPricing from "./pages/AdminPricing";
+import AdminCouriers from "./pages/AdminCouriers";
+import AdminUsers from "./pages/AdminUsers";
 
 // Entrepreneur Imports
-import EntrepreneurLayout from './components/EntrepreneurLayout'; 
+import EntrepreneurLayout from "./components/EntrepreneurLayout";
 import EntrepreneurDashboard from "./pages/EntrepreneurDashboard";
 import MyDeliveries from "./pages/MyDeliveries";
 import CreateDelivery from "./pages/CreateDelivery";
 import TrackOrder from "./pages/TrackOrder";
 
+// Driver Imports (Added)
+import DriverDashboard from "./pages/DriverDashboard";
 
-
-
+// Admin Protection Component
 function AdminRoute({ children }) {
   const token = localStorage.getItem("token");
   const storedUser = localStorage.getItem("user");
@@ -38,21 +37,35 @@ function AdminRoute({ children }) {
   }
 }
 
-// Entrepreneur Protection Component (අලුතින් එකතු කළා)
+// Entrepreneur Protection Component
 function EntrepreneurRoute({ children }) {
   const token = localStorage.getItem("token");
   const storedUser = localStorage.getItem("user");
   if (!token || !storedUser) return <Navigate to="/login" replace />;
   try {
     const user = JSON.parse(storedUser);
-    return user?.role === "entrepreneur" ? children : <Navigate to="/" replace />;
+    return user?.role === "entrepreneur" ? (
+      children
+    ) : (
+      <Navigate to="/" replace />
+    );
   } catch {
     return <Navigate to="/login" replace />;
   }
 }
 
-// Entrepreneur Pages
-
+// Driver Protection Component (Added)
+function DriverRoute({ children }) {
+  const token = localStorage.getItem("token");
+  const storedUser = localStorage.getItem("user");
+  if (!token || !storedUser) return <Navigate to="/login" replace />;
+  try {
+    const user = JSON.parse(storedUser);
+    return user?.role === "driver" ? children : <Navigate to="/" replace />;
+  } catch {
+    return <Navigate to="/login" replace />;
+  }
+}
 
 function App() {
   return (
@@ -72,9 +85,7 @@ function App() {
         }
       />
 
-
-      {/* Admin Routes */}
-
+      {/* 3. Admin Routes */}
       <Route
         path="/admin"
         element={
@@ -90,8 +101,7 @@ function App() {
         <Route path="entrepreneurs" element={<AdminUsers />} />
       </Route>
 
-
-      {/* 4. Entrepreneur Routes (Protected & Layout Attached) */}
+      {/* 4. Entrepreneur Routes */}
       <Route
         path="/entrepreneur"
         element={
@@ -100,13 +110,22 @@ function App() {
           </EntrepreneurRoute>
         }
       >
-
         <Route index element={<EntrepreneurDashboard />} />
         <Route path="dashboard" element={<EntrepreneurDashboard />} />
         <Route path="my-deliveries" element={<MyDeliveries />} />
         <Route path="create-delivery" element={<CreateDelivery />} />
         <Route path="track/:id" element={<TrackOrder />} />
       </Route>
+
+      {/* 5. Driver Routes (Added) */}
+      <Route
+        path="/driver"
+        element={
+          <DriverRoute>
+            <DriverDashboard />
+          </DriverRoute>
+        }
+      />
 
       {/* Fallback */}
       <Route path="*" element={<Navigate to="/" />} />
