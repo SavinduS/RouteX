@@ -21,10 +21,16 @@ export const getDeliveryById = async (id, token) => {
     return response.data;
 };
 
-// 4. Delivery එකක් Update කරන්න
+// Delivery එකක් Update කරන්න
 export const updateDelivery = async (id, updateData, token) => {
   const config = { headers: { Authorization: `Bearer ${token}` } };
   const response = await API.put(`/deliveries/${id}`, updateData, config);
+  return response.data;
+};
+
+// Driver ගේ Active Orders ටික ගන්න
+export const getActiveOrders = async () => {
+  const response = await API.get('/driver/orders/active');
   return response.data;
 };
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import api from "../services/api";
+import { getActiveOrders } from "../services/deliveryService";
 import { io } from "socket.io-client";
 import MapComponent from "../components/MapComponent";
 import {
@@ -23,10 +24,8 @@ const DriverDashboard = () => {
   const [isOnline, setIsOnline] = useState(
     () => localStorage.getItem("driverOnline") === "true",
   );
-  const [activeOrders, setActiveOrders] = useState(() => {
-    const saved = localStorage.getItem("activeOrders");
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [activeOrders, setActiveOrders] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const [driverLocation, setDriverLocation] = useState(null);
   const [selectedOrderId, setSelectedOrderId] = useState(null);
@@ -40,15 +39,30 @@ const DriverDashboard = () => {
     return () => newSocket.close();
   }, []);
 
+  // Fetch active orders from API
+  const fetchActiveOrders = async () => {
+    try {
+      setLoading(true);
+      const res = await getActiveOrders();
+      if (res.success) {
+        setActiveOrders(res.data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch active orders:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // 2. Persist State & Manage GeoWatcher based on Online Status
   useEffect(() => {
     if (!DRIVER_ID) return;
 
     localStorage.setItem("driverOnline", isOnline);
-    localStorage.setItem("activeOrders", JSON.stringify(activeOrders));
-
+    
     let watchId;
     if (isOnline) {
+      fetchActiveOrders(); // Fetch orders when going online
       socket?.emit("driver_go_online", { driver_id: DRIVER_ID });
 
       if (navigator.geolocation) {
