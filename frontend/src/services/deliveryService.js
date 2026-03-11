@@ -34,6 +34,12 @@ export const getActiveOrders = async () => {
   return response.data;
 };
 
+// Driver ගේ Order History එක ගන්න (delivered orders)
+export const getDriverHistory = async () => {
+  const response = await API.get('/driver/orders/history');
+  return response.data;
+};
+
 // Admin වෙත Inquiry යැවීම
 export const sendInquiry = async (inquiryData, token) => {
   const config = { 

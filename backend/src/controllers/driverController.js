@@ -80,6 +80,26 @@ exports.getActiveOrders = async (req, res) => {
   }
 };
 
+// Fetch Delivery History for a Driver (delivered or cancelled)
+exports.getDeliveryHistory = async (req, res) => {
+  try {
+    const driver_id = req.user.id;
+
+    const history = await DeliveryHistory.find({
+      driver_id,
+      final_status: "delivered", // We mainly want successful orders for earnings
+    }).sort({ completed_at: -1 });
+
+    res.status(200).json({
+      success: true,
+      count: history.length,
+      data: history,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
 // 3. Accept/Confirm an Order
 exports.acceptOrder = async (req, res) => {
   try {

@@ -9,6 +9,7 @@ const {
   updateLocation,
   getAvailableOrders,
   getActiveOrders,
+  getDeliveryHistory,
   acceptOrder,
   updateOrderStatus,
 } = require("../controllers/driverController");
@@ -23,6 +24,9 @@ router.route("/orders/available").get(getAvailableOrders);
 
 // Fetch Active Orders (assigned/picked_up)
 router.route("/orders/active").get(getActiveOrders);
+
+// Fetch Delivery History (delivered)
+router.route("/orders/history").get(getDeliveryHistory);
 
 // 3. Accept an Order (POST /api/driver/orders/accept)
 router.route("/orders/accept").post(acceptOrder);
