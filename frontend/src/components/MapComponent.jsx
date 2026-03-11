@@ -83,7 +83,7 @@ const MapComponent = ({ driverLocation, selectedOrder }) => {
   }, [driverLocation, destination]);
 
   return (
-    <div className="w-full h-full min-h-[400px] rounded-xl overflow-hidden relative">
+    <div className="w-full h-full min-h-[300px] md:min-h-[400px] lg:min-h-0 rounded-xl overflow-hidden relative">
       <Map
         ref={mapRef}
         initialViewState={{

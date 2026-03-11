@@ -7,6 +7,8 @@ import {
   Search,
   Filter,
   RefreshCcw,
+  ChevronDown,
+  ChevronUp
 } from "lucide-react";
 
 // Helper: Calculate distance between two lat/lng coordinates in kilometers (Haversine Formula)
@@ -34,6 +36,7 @@ const AvailableOrders = () => {
   const [isOnline, setIsOnline] = useState(
     () => localStorage.getItem("driverOnline") === "true",
   );
+  const [showFilters, setShowFilters] = useState(false); // Mobile filter toggle
 
   // Filter States
   const [searchCity, setSearchCity] = useState("");
@@ -118,28 +121,29 @@ const AvailableOrders = () => {
     });
 
   return (
-    <div className="p-6 bg-[#F1F5F9] min-h-screen font-sans">
-      <div className="flex justify-between items-center mb-8 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+    <div className="p-3 md:p-6 bg-[#F1F5F9] min-h-screen font-sans">
+      {/* Responsive Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 md:mb-8 bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-slate-200 gap-4 text-center sm:text-left">
         <div>
-          <h1 className="text-3xl font-black text-slate-800 flex items-center gap-3">
-            <Package className="text-[#1D4ED8] w-8 h-8" /> Available Orders
+          <h1 className="text-xl md:text-3xl font-black text-slate-800 flex items-center justify-center sm:justify-start gap-3">
+            <Package className="text-[#1D4ED8] w-6 h-6 md:w-8 md:h-8" /> Available Orders
           </h1>
-          <p className="text-slate-500 font-medium mt-1">Browse and accept delivery requests near you</p>
+          <p className="text-xs md:text-sm text-slate-500 font-medium mt-1">Browse and accept delivery requests near you</p>
         </div>
         <button
           onClick={fetchAvailableOrders}
-          className="flex items-center gap-2 bg-[#1D4ED8] text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-800 transition-all shadow-lg active:scale-95"
+          className="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#1D4ED8] text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-800 transition-all shadow-lg active:scale-95 text-sm md:text-base"
         >
           <RefreshCcw size={20} /> Refresh
         </button>
       </div>
 
       {!isOnline && (
-        <div className="bg-white border-l-4 border-[#06B6D4] p-6 rounded-xl shadow-sm mb-8 flex items-center gap-4">
-          <div className="bg-cyan-50 p-3 rounded-full">
-            <Filter className="text-[#06B6D4]" />
+        <div className="bg-white border-l-4 border-rose-500 p-4 md:p-6 rounded-xl shadow-sm mb-8 flex items-center gap-4">
+          <div className="bg-rose-50 p-2 md:p-3 rounded-full shrink-0">
+            <Filter className="text-rose-500 w-5 h-5 md:w-6 md:h-6" />
           </div>
-          <p className="text-slate-700 font-medium">
+          <p className="text-sm md:text-base text-slate-700 font-medium leading-relaxed">
             You are currently offline. Please go online from the{" "}
             <a href="/driver/dashboard" className="text-[#1D4ED8] font-bold hover:underline">
               Dashboard
@@ -150,11 +154,26 @@ const AvailableOrders = () => {
       )}
 
       {isOnline && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="flex flex-col md:grid md:grid-cols-4 gap-6 md:gap-8">
+          
+          {/* Mobile Filter Toggle */}
+          <button 
+            onClick={() => setShowFilters(!showFilters)}
+            className="md:hidden flex items-center justify-between bg-white p-4 rounded-xl shadow-sm border border-slate-200 font-bold text-slate-700"
+          >
+            <span className="flex items-center gap-2">
+              <Filter size={18} className="text-[#1D4ED8]" /> Filters
+            </span>
+            {showFilters ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+          </button>
+
           {/* Filters Column */}
-          <div className="md:col-span-1 space-y-6">
+          <div className={`
+            ${showFilters ? 'block' : 'hidden'} 
+            md:block md:col-span-1 space-y-6
+          `}>
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-              <h2 className="font-black text-slate-800 mb-5 flex items-center gap-2 uppercase tracking-wider text-sm">
+              <h2 className="hidden md:flex font-black text-slate-800 mb-5 items-center gap-2 uppercase tracking-wider text-sm">
                 <Filter size={18} className="text-[#1D4ED8]" /> Filters
               </h2>
               
@@ -215,36 +234,36 @@ const AvailableOrders = () => {
           {/* Orders List Column */}
           <div className="md:col-span-3">
             {filteredAvailableOrders.length === 0 ? (
-              <div className="bg-white p-16 rounded-3xl shadow-sm text-center border border-slate-200">
-                <div className="bg-slate-50 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
+              <div className="bg-white p-10 md:p-16 rounded-3xl shadow-sm text-center border border-slate-200">
+                <div className="bg-slate-50 w-20 h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center mx-auto mb-6">
                   <Package size={48} className="text-slate-200" />
                 </div>
-                <h3 className="text-2xl font-black text-slate-800 mb-3">No orders found</h3>
-                <p className="text-slate-500 max-w-sm mx-auto leading-relaxed">
+                <h3 className="text-xl md:text-2xl font-black text-slate-800 mb-3">No orders found</h3>
+                <p className="text-sm md:text-base text-slate-500 max-w-sm mx-auto leading-relaxed">
                   {availableOrders.length > 0
                     ? "Try adjusting your filters or search location to see more results."
                     : "There are no available orders at the moment. We'll alert you when new ones arrive!"}
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
                 {filteredAvailableOrders.map((order) => (
                   <div
                     key={order._id}
-                    className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-xl hover:border-[#1D4ED8]/30 transition-all group"
+                    className="bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-xl hover:border-[#1D4ED8]/30 transition-all group"
                   >
-                    <div className="flex justify-between items-start mb-6">
-                      <div>
-                        <span className="text-[10px] font-black text-[#1D4ED8] bg-blue-50 px-3 py-1.5 rounded-full uppercase tracking-widest">
-                          Order #{order.order_id}
+                    <div className="flex justify-between items-start mb-4 md:mb-6">
+                      <div className="flex-1 pr-2">
+                        <span className="text-[10px] font-black text-[#1D4ED8] bg-blue-50 px-2.5 py-1 rounded-full uppercase tracking-widest truncate block max-w-[150px]">
+                          #{order.order_id}
                         </span>
-                        <h3 className="font-black text-slate-900 mt-3 text-lg">
+                        <h3 className="font-black text-slate-900 mt-2 text-base md:text-lg leading-tight">
                           To {order.dropoff_address.split(',')[0]}
                         </h3>
                       </div>
                       {order.distanceToPickup !== null && (
-                        <div className="text-right">
-                          <span className="text-sm font-black text-[#06B6D4] bg-cyan-50 px-3 py-1.5 rounded-full">
+                        <div className="text-right shrink-0">
+                          <span className="text-xs font-black text-[#06B6D4] bg-cyan-50 px-2.5 py-1 rounded-full">
                             {order.distanceToPickup.toFixed(1)} km
                           </span>
                           <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase">Away</p>
@@ -252,34 +271,34 @@ const AvailableOrders = () => {
                       )}
                     </div>
 
-                    <div className="space-y-4 mb-8">
-                      <div className="flex gap-4">
-                        <div className="flex flex-col items-center mt-1">
+                    <div className="space-y-4 mb-6 md:mb-8">
+                      <div className="flex gap-3 md:gap-4">
+                        <div className="flex flex-col items-center mt-1 shrink-0">
                           <div className="w-2.5 h-2.5 rounded-full border-2 border-[#06B6D4] bg-white"></div>
                           <div className="w-0.5 flex-1 bg-slate-100 my-1"></div>
                           <div className="w-2.5 h-2.5 rounded-full bg-[#1D4ED8]"></div>
                         </div>
-                        <div className="flex-1 space-y-4">
-                          <div>
+                        <div className="flex-1 space-y-3 md:space-y-4 min-w-0">
+                          <div className="min-w-0">
                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-tighter mb-0.5">Pickup</p>
-                            <p className="text-xs font-bold text-slate-700 leading-snug">{order.pickup_address}</p>
+                            <p className="text-xs font-bold text-slate-700 leading-snug truncate">{order.pickup_address}</p>
                           </div>
-                          <div>
+                          <div className="min-w-0">
                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-tighter mb-0.5">Drop-off</p>
-                            <p className="text-xs font-bold text-slate-700 leading-snug">{order.dropoff_address}</p>
+                            <p className="text-xs font-bold text-slate-700 leading-snug truncate">{order.dropoff_address}</p>
                           </div>
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between pt-5 border-t border-slate-50">
-                      <div>
-                        <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-1">Total Earning</p>
-                        <p className="text-2xl font-black text-slate-900">LKR {order.total_cost}</p>
+                    <div className="flex flex-col sm:flex-row items-center justify-between pt-4 md:pt-5 border-t border-slate-50 gap-4">
+                      <div className="text-center sm:text-left">
+                        <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-0.5">Total Earning</p>
+                        <p className="text-xl md:text-2xl font-black text-slate-900">LKR {order.total_cost}</p>
                       </div>
                       <button
                         onClick={() => handleAcceptOrder(order)}
-                        className="bg-slate-900 text-white px-8 py-3.5 rounded-xl font-black text-sm hover:bg-[#1D4ED8] transition-all shadow-lg active:scale-95 group-hover:scale-105"
+                        className="w-full sm:w-auto bg-slate-900 text-white px-8 py-3 rounded-xl font-black text-sm hover:bg-[#1D4ED8] transition-all shadow-lg active:scale-95 group-hover:scale-105"
                       >
                         Accept Order
                       </button>
