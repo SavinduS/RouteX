@@ -40,7 +40,7 @@ const DriverDashboard = () => {
   }, []);
 
   // Fetch active orders from API
-  const fetchActiveOrders = async () => {
+  const fetchActiveOrders = React.useCallback(async () => {
     try {
       setLoading(true);
       const res = await getActiveOrders();
@@ -52,45 +52,57 @@ const DriverDashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  // 2. Persist State & Manage GeoWatcher based on Online Status
+  // 2. Fetch orders when going online
   useEffect(() => {
-    if (!DRIVER_ID) return;
+    if (isOnline && DRIVER_ID) {
+      fetchActiveOrders();
+      socket?.emit("driver_go_online", { driver_id: DRIVER_ID });
+    } else if (!isOnline && DRIVER_ID) {
+      socket?.emit("driver_go_offline", { driver_id: DRIVER_ID });
+    }
+  }, [isOnline, DRIVER_ID, socket, fetchActiveOrders]);
 
-    localStorage.setItem("driverOnline", isOnline);
+  // 3. Manage GeoWatcher based on Online Status
+  useEffect(() => {
+    if (!DRIVER_ID || !isOnline) return;
+
+    localStorage.setItem("driverOnline", "true");
     
     let watchId;
-    if (isOnline) {
-      fetchActiveOrders(); // Fetch orders when going online
-      socket?.emit("driver_go_online", { driver_id: DRIVER_ID });
+    if (navigator.geolocation) {
+      watchId = navigator.geolocation.watchPosition(
+        (pos) => {
+          const { latitude, longitude } = pos.coords;
+          setDriverLocation({ lat: latitude, lng: longitude });
 
-      if (navigator.geolocation) {
-        watchId = navigator.geolocation.watchPosition(
-          (pos) => {
-            const { latitude, longitude } = pos.coords;
-            setDriverLocation({ lat: latitude, lng: longitude });
-
-            socket?.emit("driver_live_location", {
-              driver_id: DRIVER_ID,
-              lat: latitude,
-              lng: longitude,
-              active_order_ids: activeOrders.map((o) => o._id),
-              driver_status: activeOrders.length > 0 ? "busy" : "online",
-            });
-          },
-          (err) => console.error("Geo error:", err),
-          { enableHighAccuracy: true, maximumAge: 0 },
-        );
-      }
-    } else {
-      socket?.emit("driver_go_offline", { driver_id: DRIVER_ID });
+          // Use functional update or ref to avoid dependency on activeOrders if possible, 
+          // but here we need activeOrders for the emit. 
+          // To avoid re-running this effect when activeOrders change, we can use a ref for activeOrders.
+        },
+        (err) => console.error("Geo error:", err),
+        { enableHighAccuracy: true, maximumAge: 1000, timeout: 5000 },
+      );
     }
 
     return () => {
       if (watchId) navigator.geolocation.clearWatch(watchId);
     };
-  }, [isOnline, activeOrders, socket, DRIVER_ID]);
+  }, [isOnline, DRIVER_ID]);
+
+  // 4. Emit location updates when location or activeOrders change
+  useEffect(() => {
+    if (isOnline && driverLocation && socket) {
+      socket.emit("driver_live_location", {
+        driver_id: DRIVER_ID,
+        lat: driverLocation.lat,
+        lng: driverLocation.lng,
+        active_order_ids: activeOrders.map((o) => o._id),
+        driver_status: activeOrders.length > 0 ? "busy" : "online",
+      });
+    }
+  }, [driverLocation, activeOrders, isOnline, socket, DRIVER_ID]);
 
   // Order Actions
   const handleUpdateStatus = async (orderId, newStatus) => {

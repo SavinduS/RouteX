@@ -16,31 +16,62 @@ const ACCENT = "#06B6D4";
 const MapComponent = ({ driverLocation, selectedOrder }) => {
   const mapRef = useRef(null);
   const [routeData, setRouteData] = useState(null);
+  const lastFetchCoords = useRef({ start: null, end: null });
 
-  // Determine Destination based on Order Status
-  let destination = null;
-  let destinationAddress = "";
-
-  if (selectedOrder) {
+  // Memoize destination to avoid unnecessary object reference changes
+  const destination = React.useMemo(() => {
+    if (!selectedOrder) return null;
+    
     if (selectedOrder.status === "assigned") {
-      destination = {
+      return {
         lat: selectedOrder.pickup_lat,
         lng: selectedOrder.pickup_lng,
+        address: "Pickup: " + selectedOrder.pickup_address,
+        type: "pickup"
       };
-      destinationAddress = "Pickup: " + selectedOrder.pickup_address;
     } else if (["picked_up", "in_transit"].includes(selectedOrder.status)) {
-      destination = {
+      return {
         lat: selectedOrder.dropoff_lat,
         lng: selectedOrder.dropoff_lng,
+        address: "Drop-off: " + selectedOrder.dropoff_address,
+        type: "dropoff"
       };
-      destinationAddress = "Drop-off: " + selectedOrder.dropoff_address;
     }
-  }
+    return null;
+  }, [
+    selectedOrder?._id, 
+    selectedOrder?.status, 
+    selectedOrder?.pickup_lat, 
+    selectedOrder?.pickup_lng, 
+    selectedOrder?.dropoff_lat, 
+    selectedOrder?.dropoff_lng,
+    selectedOrder?.pickup_address,
+    selectedOrder?.dropoff_address
+  ]);
+
+  const destinationAddress = destination?.address || "";
+
+  // Helper to calculate distance between two points (in km)
+  const getDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 6371; // Radius of the earth in km
+    const dLat = (lat2 - lat1) * (Math.PI / 180);
+    const dLon = (lon2 - lon1) * (Math.PI / 180);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
 
   // Fetch Route from OpenRouteService when locations change
   useEffect(() => {
+    let isCancelled = false;
+
     if (!driverLocation || !destination) {
       setRouteData(null);
+      lastFetchCoords.current = { start: null, end: null };
+      
       if (driverLocation && mapRef.current) {
         mapRef.current.flyTo({
           center: [driverLocation.lng, driverLocation.lat],
@@ -54,17 +85,42 @@ const MapComponent = ({ driverLocation, selectedOrder }) => {
 
     const fetchRoute = async () => {
       try {
-        const start = `${driverLocation.lng},${driverLocation.lat}`;
-        const end = `${destination.lng},${destination.lat}`;
+        const startStr = `${driverLocation.lng},${driverLocation.lat}`;
+        const endStr = `${destination.lng},${destination.lat}`;
+
+        // Only fetch if location has changed significantly (e.g. > 50 meters)
+        // or if destination has changed.
+        const prevStart = lastFetchCoords.current.start;
+        const prevEnd = lastFetchCoords.current.end;
+
+        if (prevStart && prevEnd) {
+          const distStart = getDistance(driverLocation.lat, driverLocation.lng, prevStart.lat, prevStart.lng);
+          const distEnd = getDistance(destination.lat, destination.lng, prevEnd.lat, prevEnd.lng);
+          
+          // If moved less than 50 meters and destination hasn't moved, skip fetch
+          if (distStart < 0.05 && distEnd < 0.01) {
+             return;
+          }
+        }
 
         const response = await axios.get(
-          `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${ORS_KEY}&start=${start}&end=${end}`,
+          `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${ORS_KEY}&start=${startStr}&end=${endStr}`,
         );
+
+        if (isCancelled) return;
 
         const feature = response.data.features[0];
         setRouteData(feature);
+        
+        // Only fit bounds if the destination has changed significantly
+        const destinationChanged = !prevEnd || getDistance(destination.lat, destination.lng, prevEnd.lat, prevEnd.lng) > 0.01;
 
-        if (mapRef.current && feature.bbox) {
+        lastFetchCoords.current = { 
+          start: { lat: driverLocation.lat, lng: driverLocation.lng },
+          end: { lat: destination.lat, lng: destination.lng }
+        };
+
+        if (mapRef.current && feature.bbox && destinationChanged) {
           const [minLng, minLat, maxLng, maxLat] = feature.bbox;
           mapRef.current.fitBounds(
             [
@@ -79,8 +135,14 @@ const MapComponent = ({ driverLocation, selectedOrder }) => {
       }
     };
 
-    fetchRoute();
-  }, [driverLocation, destination]);
+    // Debounce to avoid spamming ORS during fast location updates
+    const timeoutId = setTimeout(fetchRoute, 1000);
+
+    return () => {
+      isCancelled = true;
+      clearTimeout(timeoutId);
+    };
+  }, [driverLocation?.lat, driverLocation?.lng, destination]);
 
   return (
     <div className="w-full h-full min-h-[300px] md:min-h-[400px] lg:min-h-0 rounded-xl overflow-hidden relative">
