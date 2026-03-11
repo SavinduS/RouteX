@@ -142,9 +142,7 @@ function PwInput({
           inputMode="text"
           spellCheck={false}
 
-          className="w-full h-11 rounded-xl pl-9 pr-10 text-sm bg-white border border-slate-200 text-slate-900 shadow-sm
-                     focus:outline-none focus:ring-2 focus:ring-[#06B6D4] focus:border-transparent transition-all
-                     appearance-none"
+          className="w-full h-11 rounded-xl pl-9 pr-10 text-sm bg-white border border-slate-200 text-slate-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4] focus:border-transparent transition-all appearance-none"
         />
 
         <button
@@ -237,7 +235,7 @@ export default function UserProfile() {
   const handleSave = async () => {
     setMessage("");
 
-    // ✅ validations (like register)
+    //  validations (like register)
     const fullName = (form.full_name || "").trim();
     const email = (form.email || "").trim().toLowerCase();
     const phone = (form.phone_number || "").trim();
@@ -296,7 +294,7 @@ export default function UserProfile() {
 
     if (!current || !next) return setMessage("Please fill in current and new password");
 
-    // ✅ minimum 5 for both
+    //  minimum 5 for both
     if (current.length < 5) return setMessage("Current password must be at least 5 characters");
     if (next.length < 5) return setMessage("New password must be at least 5 characters");
 
@@ -323,6 +321,29 @@ export default function UserProfile() {
     }
   };
 
+  const handleDeleteProfile = async () => {
+  setMessage("");
+
+  const confirmed = window.confirm(
+    "Are you sure you want to delete your profile? This action cannot be undone."
+  );
+
+  if (!confirmed) return;
+
+  try {
+    await api.delete("/users/profile"); 
+
+    localStorage.removeItem("user");
+    window.dispatchEvent(new Event("storage"));
+
+    window.location.href = "/login"; 
+  } catch (err) {
+    setMessage(
+      err?.response?.data?.message || "Profile delete failed"
+    );
+  }
+};
+
   if (!user) return null;
 
   const tabs = [
@@ -330,17 +351,17 @@ export default function UserProfile() {
     { id: "security", label: "Security" },
   ];
 
-  //  user_id 
+  //  user_id
   const displayUserId = user?.user_id || "—";
 
   return (
     <div className="min-h-screen bg-[#F1F5F9]" style={{ fontFamily: "'DM Sans', sans-serif" }}>
       <Navbar />
 
-      <div className="max-w-5xl mx-auto px-5 py-10 grid lg:grid-cols-[268px_1fr] gap-6 items-start">
+      <div className="max-w-5xl mx-auto px-4 sm:px-5 py-6 sm:py-10 grid lg:grid-cols-[268px_1fr] gap-4 sm:gap-6 items-start">
         {/* SIDEBAR */}
         <aside className="space-y-4">
-          <div className="bg-white rounded-3xl p-6 text-center shadow-sm border border-slate-100">
+          <div className="bg-white rounded-3xl p-5 sm:p-6 text-center shadow-sm border border-slate-100">
             <div className="w-20 h-20 mx-auto rounded-2xl bg-[#06B6D4] flex items-center justify-center text-2xl font-black text-white shadow-md">
               {getInitials(user)}
             </div>
@@ -360,7 +381,7 @@ export default function UserProfile() {
                 <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
                   ID
                 </span>
-                <span className="text-sm font-bold text-slate-900 tracking-widest">
+                <span className="text-sm font-bold text-slate-900 tracking-widest break-all">
                   {user?.user_id}
                 </span>
               </div>
@@ -393,7 +414,7 @@ export default function UserProfile() {
               <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600 mb-1">
                 MEMBER SINCE
               </p>
-              <p className="text-sm font-bold text-slate-900">{memberSince}</p>
+              <p className="text-xs sm:text-sm font-bold text-slate-900">{memberSince}</p>
             </div>
 
             <div className="bg-[#F1F5F9] rounded-xl py-3 px-2 text-center">
@@ -407,9 +428,9 @@ export default function UserProfile() {
 
         {/* MAIN PANEL */}
         <main>
-          <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100">
+          <div className="bg-white rounded-3xl p-5 sm:p-8 shadow-sm border border-slate-100">
             {/* panel header */}
-            <div className="flex items-center justify-between mb-7">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-7">
               <div>
                 <h2 className="text-lg font-bold text-slate-900">
                   {activeTab === "info" ? "Personal Information" : "Security Settings"}
@@ -420,7 +441,7 @@ export default function UserProfile() {
               </div>
 
               {activeTab === "info" && (
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   {!editing ? (
                     <button
                       onClick={() => {
@@ -459,7 +480,7 @@ export default function UserProfile() {
             {activeTab === "info" && (
               <>
                 {/*  Personal Info editable fields */}
-                <div className="grid sm:grid-cols-2 gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <Field
                     icon={User}
                     label="Full Name"
@@ -496,7 +517,7 @@ export default function UserProfile() {
                       Some fields are read-only for security reasons.
                     </p>
 
-                    <div className="mt-5 grid sm:grid-cols-2 gap-4">
+                    <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="flex items-start gap-3 rounded-xl bg-white border border-slate-100 p-4">
                         <Car size={16} className="text-slate-600 mt-0.5" />
                         <div>
@@ -538,7 +559,7 @@ export default function UserProfile() {
 
             {/* SECURITY TAB */}
             {activeTab === "security" && (
-              <div className="space-y-5 max-w-md">
+              <div className="space-y-5 w-full max-w-md">
                 <PwInput
                   label="Current Password"
                   name="current_password"
@@ -577,6 +598,14 @@ export default function UserProfile() {
                   className="w-full py-3 rounded-xl text-sm font-bold bg-[#06B6D4] text-white hover:bg-[#0891B2] active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-2"
                 >
                   {pwLoading ? "Updating…" : "Update Password"}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleDeleteProfile}
+                  className="w-full py-3 rounded-xl text-sm font-bold bg-rose-700 text-white hover:bg-rose-800 active:scale-95 transition-all mt-2"
+                >
+                  Delete Profile
                 </button>
               </div>
             )}

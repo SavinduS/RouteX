@@ -14,6 +14,7 @@ export default function Navbar() {
   const navigate = useNavigate();
   const [openProfile, setOpenProfile] = useState(false);
   const [openMobile, setOpenMobile] = useState(false);
+  const [activeSection, setActiveSection] = useState("top");
 
   const dropdownRef = useRef(null);
 
@@ -61,9 +62,13 @@ export default function Navbar() {
   };
 
   const linkBase =
-    "px-3 py-2 rounded-xl text-sm font-semibold transition-colors";
-  const linkInactive = "text-slate-700 hover:text-[#1D4ED8] hover:bg-[#F1F5F9]";
-  const linkActive = "text-[#1D4ED8] bg-[#1D4ED8]/10";
+  "px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200";
+
+const linkInactive =
+  "text-slate-700 hover:text-[#1D4ED8] hover:bg-[#F8FAFC]";
+
+const linkActive =
+  "text-[#1D4ED8] bg-[#DBEAFE] shadow-sm";
 
   const NavItem = ({ to, label }) => (
     <NavLink
@@ -77,71 +82,111 @@ export default function Navbar() {
     </NavLink>
   );
 
+  useEffect(() => {
+    const sections = ["top", "about", "services", "contact"];
+
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY + 120;
+
+      for (let i = sections.length - 1; i >= 0; i--) {
+        const section = document.getElementById(sections[i]);
+        if (section && section.offsetTop <= scrollPosition) {
+          setActiveSection(sections[i]);
+          break;
+        }
+      }
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll);
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
     <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-slate-200">
-      <div className="max-w-6xl mx-auto px-5 py-4 flex items-center justify-between">
-        {/* Brand */}
+      <div className="max-w-6xl mx-auto px-5 py-3 flex items-center justify-between gap-6">        {/* Brand */}
         <Link to="/" className="flex items-center gap-2">
         <div className="w-9 h-9 rounded-2xl bg-[#1D4ED8] shadow-sm" />
         <span className="text-lg font-extrabold text-slate-900">RouteX</span>
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-1 bg-white rounded-2xl p-1 border border-slate-200">
-          <NavItem to="/" label="Home" />
-          <NavItem to="/about" label="About" />
-          <NavItem to="/services" label="Services" />
-          <NavItem to="/contact" label="Contact" />
+        <nav className="hidden md:flex items-center gap-1 bg-white rounded-2xl p-1 border border-slate-200 flex-shrink-0">
+          <a
+            href="#top"
+            className={`${linkBase} ${activeSection === "top" ? linkActive : linkInactive}`}
+          >
+            Home
+          </a>
+          <a
+            href="#about"
+            className={`${linkBase} ${activeSection === "about" ? linkActive : linkInactive}`}
+          >
+            About
+          </a>
+          <a
+            href="#services"
+            className={`${linkBase} ${activeSection === "services" ? linkActive : linkInactive}`}
+          >
+            Services
+          </a>
+          <a
+            href="#contact"
+            className={`${linkBase} ${activeSection === "contact" ? linkActive : linkInactive}`}
+          >
+            Contact
+          </a>
         </nav>
 
         {/* Right actions */}
-        <div className="hidden md:flex items-center gap-2">
-  {!isLoggedIn ? (
-    <>
-      <Link
-        to="/login"
-        className="px-4 py-2 rounded-xl text-sm font-bold text-slate-700 hover:bg-[#F1F5F9] transition"
-      >
-        Login
-      </Link>
-      <Link
-        to="/register"
-        className="px-4 py-2 rounded-xl text-sm font-bold text-white bg-[#06B6D4] hover:bg-[#0891B2] active:scale-95 transition"
-      >
-        Register
-      </Link>
-    </>
-  ) : (
-    <div className="flex items-center gap-4">
-      {/* Clickable User Info */}
-      <div
-        onClick={() => navigate("/profile")}
-        className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition"
-      >
-        <div className="w-10 h-10 rounded-full bg-[#1D4ED8] text-white font-bold flex items-center justify-center">
-          {getInitials(user)}
-        </div>
+        <div className="hidden md:flex items-center gap-2 flex-shrink-0 relative z-10">
+        {!isLoggedIn ? (
+          <>
+            <Link
+              to="/login"
+              className="px-4 py-2 rounded-xl text-sm font-bold text-slate-700 hover:bg-[#F1F5F9] transition"
+            >
+              Login
+            </Link>
+            <Link
+              to="/register"
+              className="px-4 py-2 rounded-xl text-sm font-bold text-white bg-[#06B6D4] hover:bg-[#0891B2] active:scale-95 transition"
+            >
+              Register
+            </Link>
+          </>
+        ) : (
+          <div className="flex items-center gap-4">
+            {/* Clickable User Info */}
+            <div
+              onClick={() => navigate("/profile")}
+              className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition"
+            >
+              <div className="w-10 h-10 rounded-full bg-[#1D4ED8] text-white font-bold flex items-center justify-center">
+                {getInitials(user)}
+              </div>
 
-        <div className="leading-tight">
-          <p className="text-sm font-bold text-slate-900">
-            {user?.full_name || "User"}
-          </p>
-          <p className="text-xs text-slate-500 capitalize">
-            {user?.role}
-          </p>
-        </div>
+              <div className="leading-tight">
+                <p className="text-sm font-bold text-slate-900">
+                  {user?.full_name || "User"}
+                </p>
+                <p className="text-xs text-slate-500 capitalize">
+                  {user?.role}
+                </p>
+              </div>
+            </div>
+
+            {/* Logout Button */}
+            <button
+              onClick={logout}
+              className="px-4 py-2 rounded-xl border border-red-500 text-red-500 font-semibold text-sm hover:bg-red-50 transition"
+            >
+              Logout
+            </button>
+          </div>
+        )}
       </div>
-
-      {/* Logout Button */}
-      <button
-        onClick={logout}
-        className="px-4 py-2 rounded-xl border border-red-500 text-red-500 font-semibold text-sm hover:bg-red-50 transition"
-      >
-        Logout
-      </button>
-    </div>
-  )}
-</div>
 
         {/* Mobile menu button */}
         <button
@@ -158,43 +203,37 @@ export default function Navbar() {
         <div className="md:hidden border-t border-slate-200 bg-white">
           <div className="max-w-6xl mx-auto px-5 py-4 space-y-2">
             <div className="grid gap-2">
-              <NavLink
-                to="/"
-                end
+              <a
+                href="#top"
                 onClick={() => setOpenMobile(false)}
-                className={({ isActive }) =>
-                  `block ${linkBase} ${isActive ? linkActive : linkInactive}`
-                }
+                className={`block ${linkBase} ${activeSection === "top" ? linkActive : linkInactive}`}
               >
                 Home
-              </NavLink>
-              <NavLink
-                to="/about"
+              </a>
+
+              <a
+                href="#about"
                 onClick={() => setOpenMobile(false)}
-                className={({ isActive }) =>
-                  `block ${linkBase} ${isActive ? linkActive : linkInactive}`
-                }
+                className={`block ${linkBase} ${activeSection === "about" ? linkActive : linkInactive}`}
               >
                 About
-              </NavLink>
-              <NavLink
-                to="/services"
+              </a>
+
+              <a
+                href="#services"
                 onClick={() => setOpenMobile(false)}
-                className={({ isActive }) =>
-                  `block ${linkBase} ${isActive ? linkActive : linkInactive}`
-                }
+                className={`block ${linkBase} ${activeSection === "services" ? linkActive : linkInactive}`}
               >
                 Services
-              </NavLink>
-              <NavLink
-                to="/contact"
+              </a>
+
+              <a
+                href="#contact"
                 onClick={() => setOpenMobile(false)}
-                className={({ isActive }) =>
-                  `block ${linkBase} ${isActive ? linkActive : linkInactive}`
-                }
+                className={`block ${linkBase} ${activeSection === "contact" ? linkActive : linkInactive}`}
               >
                 Contact
-              </NavLink>
+              </a>
             </div>
 
             <div className="h-px bg-slate-200 my-2" />
@@ -208,6 +247,7 @@ export default function Navbar() {
                 >
                   Login
                 </Link>
+
                 <Link
                   to="/register"
                   onClick={() => setOpenMobile(false)}
@@ -227,6 +267,7 @@ export default function Navbar() {
                 >
                   Profile
                 </button>
+
                 <button
                   onClick={logout}
                   className="w-full text-left px-4 py-3 rounded-xl text-sm font-semibold text-red-600 bg-red-50 hover:bg-red-100 transition"
