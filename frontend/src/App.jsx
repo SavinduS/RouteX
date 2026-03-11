@@ -15,6 +15,10 @@ import AdminPricing from './pages/AdminPricing';
 import AdminCouriers from './pages/AdminCouriers';
 import AdminUsers from './pages/AdminUsers';
 
+// Driver Imports
+import DriverLayout from './components/DriverLayout';
+import DriverDashboard from './pages/DriverDashboard';
+
 
 // Entrepreneur Imports
 import EntrepreneurLayout from './components/EntrepreneurLayout'; 
@@ -46,6 +50,19 @@ function EntrepreneurRoute({ children }) {
   try {
     const user = JSON.parse(storedUser);
     return user?.role === "entrepreneur" ? children : <Navigate to="/" replace />;
+  } catch {
+    return <Navigate to="/login" replace />;
+  }
+}
+
+// Driver Protection Component
+function DriverRoute({ children }) {
+  const token = localStorage.getItem("token");
+  const storedUser = localStorage.getItem("user");
+  if (!token || !storedUser) return <Navigate to="/login" replace />;
+  try {
+    const user = JSON.parse(storedUser);
+    return user?.role === "driver" ? children : <Navigate to="/" replace />;
   } catch {
     return <Navigate to="/login" replace />;
   }
@@ -106,6 +123,20 @@ function App() {
         <Route path="my-deliveries" element={<MyDeliveries />} />
         <Route path="create-delivery" element={<CreateDelivery />} />
         <Route path="track/:id" element={<TrackOrder />} />
+      </Route>
+
+      {/* 5. Driver Routes */}
+      <Route
+        path="/driver"
+        element={
+          <DriverRoute>
+            <DriverLayout />
+          </DriverRoute>
+        }
+      >
+        <Route index element={<DriverDashboard />} />
+        <Route path="dashboard" element={<DriverDashboard />} />
+        <Route path="profile" element={<UserProfile />} />
       </Route>
 
       {/* Fallback */}

@@ -9,6 +9,8 @@ export default function Login() {
 
   const getRedirectPathByRole = (role) => {
     if (role === "admin") return "/admin";
+    if (role === "driver") return "/driver";
+    if (role === "entrepreneur") return "/entrepreneur";
     return "/";
   };
 
