@@ -3,15 +3,11 @@ import React, { useEffect, useState, useRef } from "react";
 import Map, { Marker, Source, Layer, NavigationControl, FullscreenControl } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 import axios from "axios";
+import { Navigation, MapPin } from "lucide-react";
 
 // --- GET API KEYS FROM .ENV ---
-// If using Vite:
 const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_API_KEY;
 const ORS_KEY = import.meta.env.VITE_ORS_API_KEY;
-
-// If using Create React App (uncomment below and delete the Vite ones above):
-// const MAPTILER_KEY = process.env.REACT_APP_MAPTILER_API_KEY;
-// const ORS_KEY = process.env.REACT_APP_ORS_API_KEY;
 
 const MapComponent = ({ driverLocation, selectedOrder }) => {
   const mapRef = useRef(null);
@@ -55,7 +51,6 @@ const MapComponent = ({ driverLocation, selectedOrder }) => {
 
     const fetchRoute = async () => {
       try {
-        // ORS expects coordinates in [longitude, latitude] format
         const start = `${driverLocation.lng},${driverLocation.lat}`;
         const end = `${destination.lng},${destination.lat}`;
 
@@ -66,7 +61,6 @@ const MapComponent = ({ driverLocation, selectedOrder }) => {
         const feature = response.data.features[0];
         setRouteData(feature);
 
-        // Adjust map bounds to perfectly fit the entire route
         if (mapRef.current && feature.bbox) {
           const [minLng, minLat, maxLng, maxLat] = feature.bbox;
           mapRef.current.fitBounds(
@@ -90,30 +84,24 @@ const MapComponent = ({ driverLocation, selectedOrder }) => {
       <Map
         ref={mapRef}
         initialViewState={{
-          longitude: driverLocation?.lng || 79.8612, // Default: Colombo
+          longitude: driverLocation?.lng || 79.8612,
           latitude: driverLocation?.lat || 6.9271,
           zoom: 13,
         }}
-        // Using MapTiler Voyager style for a professional, clean look
         mapStyle={`https://api.maptiler.com/maps/voyager/style.json?key=${MAPTILER_KEY}`}
         style={{ width: "100%", height: "100%" }}
       >
         <NavigationControl position="top-right" />
         <FullscreenControl position="top-right" />
 
-        {/* Draw Navigation Line (Real Roads via ORS) */}
         {routeData && (
           <Source id="route-source" type="geojson" data={routeData}>
-            {/* Outline for the route line to make it pop */}
             <Layer
               id="route-layer-outline"
               type="line"
-              layout={{
-                "line-join": "round",
-                "line-cap": "round",
-              }}
+              layout={{ "line-join": "round", "line-cap": "round" }}
               paint={{
-                "line-color": "#1e40af", // Darker blue for outline
+                "line-color": "#1e40af",
                 "line-width": 8,
                 "line-opacity": 0.3,
               }}
@@ -121,44 +109,45 @@ const MapComponent = ({ driverLocation, selectedOrder }) => {
             <Layer
               id="route-layer"
               type="line"
-              layout={{
-                "line-join": "round",
-                "line-cap": "round",
-              }}
+              layout={{ "line-join": "round", "line-cap": "round" }}
               paint={{
-                "line-color": "#3b82f6", // Tailwind blue-500
+                "line-color": "#3b82f6",
                 "line-width": 5,
               }}
             />
           </Source>
         )}
 
-        {/* Driver Marker */}
+        {/* Driver Marker - Professional Navigation Style */}
         {driverLocation && (
           <Marker
             longitude={driverLocation.lng}
             latitude={driverLocation.lat}
-            anchor="bottom"
+            anchor="center"
           >
             <div className="flex flex-col items-center cursor-pointer group">
-              <div className="bg-slate-800 text-white text-[10px] font-medium px-2 py-0.5 rounded-full shadow-lg mb-1 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                Your Location
+              <div className="bg-slate-900 text-white text-[10px] font-semibold px-2 py-1 rounded shadow-xl mb-2 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                You are here
               </div>
               <div className="relative">
-                <div className="absolute inset-0 bg-blue-500 rounded-full animate-ping opacity-25"></div>
-                <div className="relative bg-white p-1 rounded-full shadow-xl border-2 border-blue-500">
-                  <img
-                    src="https://cdn-icons-png.flaticon.com/512/3206/3206203.png"
-                    alt="Driver"
-                    className="w-8 h-8"
-                  />
+                {/* Pulse for professional GPS feel */}
+                <div className="absolute inset-0 bg-blue-500 rounded-full animate-ping opacity-30 scale-150"></div>
+                
+                <div className="relative bg-white p-1 rounded-full shadow-2xl border-2 border-white flex items-center justify-center">
+                  <div className="bg-blue-600 p-1.5 rounded-full shadow-inner flex items-center justify-center ring-2 ring-blue-100">
+                    <Navigation 
+                      size={14} 
+                      className="text-white fill-white" 
+                      style={{ transform: "rotate(45deg)" }} 
+                    />
+                  </div>
                 </div>
               </div>
             </div>
           </Marker>
         )}
 
-        {/* Destination Marker */}
+        {/* Destination Marker - High Contrast Professional Pin */}
         {destination && (
           <Marker
             longitude={destination.lng}
@@ -166,15 +155,14 @@ const MapComponent = ({ driverLocation, selectedOrder }) => {
             anchor="bottom"
           >
             <div className="flex flex-col items-center cursor-pointer group">
-              <div className="bg-blue-600 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-lg mb-1 whitespace-nowrap">
+              <div className="bg-red-600 text-white text-[10px] font-extrabold px-3 py-1 rounded shadow-lg mb-1 whitespace-nowrap z-10 uppercase tracking-tighter">
                 {destinationAddress.split(": ")[0]}
               </div>
-              <div className="bg-white p-1 rounded-full shadow-xl border-2 border-red-500">
-                <img
-                  src="https://cdn-icons-png.flaticon.com/512/684/684908.png"
-                  alt="Destination"
-                  className="w-8 h-8"
-                />
+              <div className="relative flex items-center justify-center">
+                 <div className="absolute bottom-0 w-1 h-1 bg-black/20 rounded-full blur-[1px] transform scale-x-150"></div>
+                 <div className="bg-white p-1.5 rounded-full shadow-xl border-2 border-red-500 relative transition-transform hover:scale-110">
+                    <MapPin size={20} className="text-red-600 fill-red-100" />
+                 </div>
               </div>
             </div>
           </Marker>
