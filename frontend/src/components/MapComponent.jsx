@@ -9,6 +9,10 @@ import { Navigation, MapPin } from "lucide-react";
 const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_API_KEY;
 const ORS_KEY = import.meta.env.VITE_ORS_API_KEY;
 
+// Color Theme
+const PRIMARY = "#1D4ED8";
+const ACCENT = "#06B6D4";
+
 const MapComponent = ({ driverLocation, selectedOrder }) => {
   const mapRef = useRef(null);
   const [routeData, setRouteData] = useState(null);
@@ -37,7 +41,6 @@ const MapComponent = ({ driverLocation, selectedOrder }) => {
   useEffect(() => {
     if (!driverLocation || !destination) {
       setRouteData(null);
-      // Just center on driver if no destination
       if (driverLocation && mapRef.current) {
         mapRef.current.flyTo({
           center: [driverLocation.lng, driverLocation.lat],
@@ -80,7 +83,7 @@ const MapComponent = ({ driverLocation, selectedOrder }) => {
   }, [driverLocation, destination]);
 
   return (
-    <div className="w-full h-full min-h-[400px] rounded-xl overflow-hidden border border-slate-200 shadow-lg relative">
+    <div className="w-full h-full min-h-[400px] rounded-xl overflow-hidden relative">
       <Map
         ref={mapRef}
         initialViewState={{
@@ -101,9 +104,9 @@ const MapComponent = ({ driverLocation, selectedOrder }) => {
               type="line"
               layout={{ "line-join": "round", "line-cap": "round" }}
               paint={{
-                "line-color": "#1e40af",
+                "line-color": PRIMARY,
                 "line-width": 8,
-                "line-opacity": 0.3,
+                "line-opacity": 0.2,
               }}
             />
             <Layer
@@ -111,14 +114,14 @@ const MapComponent = ({ driverLocation, selectedOrder }) => {
               type="line"
               layout={{ "line-join": "round", "line-cap": "round" }}
               paint={{
-                "line-color": "#3b82f6",
+                "line-color": PRIMARY,
                 "line-width": 5,
               }}
             />
           </Source>
         )}
 
-        {/* Driver Marker - Professional Navigation Style */}
+        {/* Driver Marker - ACCENT Color */}
         {driverLocation && (
           <Marker
             longitude={driverLocation.lng}
@@ -126,15 +129,13 @@ const MapComponent = ({ driverLocation, selectedOrder }) => {
             anchor="center"
           >
             <div className="flex flex-col items-center cursor-pointer group">
-              <div className="bg-slate-900 text-white text-[10px] font-semibold px-2 py-1 rounded shadow-xl mb-2 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                You are here
+              <div className="bg-slate-900 text-white text-[10px] font-black px-2 py-1 rounded shadow-xl mb-2 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 uppercase tracking-widest">
+                You
               </div>
               <div className="relative">
-                {/* Pulse for professional GPS feel */}
-                <div className="absolute inset-0 bg-blue-500 rounded-full animate-ping opacity-30 scale-150"></div>
-                
+                <div className="absolute inset-0 bg-[#06B6D4] rounded-full animate-ping opacity-30 scale-150"></div>
                 <div className="relative bg-white p-1 rounded-full shadow-2xl border-2 border-white flex items-center justify-center">
-                  <div className="bg-blue-600 p-1.5 rounded-full shadow-inner flex items-center justify-center ring-2 ring-blue-100">
+                  <div className="bg-[#06B6D4] p-1.5 rounded-full shadow-inner flex items-center justify-center ring-2 ring-cyan-100">
                     <Navigation 
                       size={14} 
                       className="text-white fill-white" 
@@ -147,7 +148,7 @@ const MapComponent = ({ driverLocation, selectedOrder }) => {
           </Marker>
         )}
 
-        {/* Destination Marker - High Contrast Professional Pin */}
+        {/* Destination Marker - PRIMARY Color */}
         {destination && (
           <Marker
             longitude={destination.lng}
@@ -155,13 +156,13 @@ const MapComponent = ({ driverLocation, selectedOrder }) => {
             anchor="bottom"
           >
             <div className="flex flex-col items-center cursor-pointer group">
-              <div className="bg-red-600 text-white text-[10px] font-extrabold px-3 py-1 rounded shadow-lg mb-1 whitespace-nowrap z-10 uppercase tracking-tighter">
+              <div className="bg-[#1D4ED8] text-white text-[10px] font-black px-3 py-1.5 rounded shadow-lg mb-1 whitespace-nowrap z-10 uppercase tracking-widest">
                 {destinationAddress.split(": ")[0]}
               </div>
               <div className="relative flex items-center justify-center">
                  <div className="absolute bottom-0 w-1 h-1 bg-black/20 rounded-full blur-[1px] transform scale-x-150"></div>
-                 <div className="bg-white p-1.5 rounded-full shadow-xl border-2 border-red-500 relative transition-transform hover:scale-110">
-                    <MapPin size={20} className="text-red-600 fill-red-100" />
+                 <div className="bg-white p-1.5 rounded-full shadow-xl border-2 border-[#1D4ED8] relative transition-transform hover:scale-110">
+                    <MapPin size={20} className="text-[#1D4ED8] fill-blue-50" />
                  </div>
               </div>
             </div>

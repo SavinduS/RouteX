@@ -118,24 +118,30 @@ const AvailableOrders = () => {
     });
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-          <Package className="text-green-600" /> Available Orders
-        </h1>
+    <div className="p-6 bg-[#F1F5F9] min-h-screen font-sans">
+      <div className="flex justify-between items-center mb-8 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+        <div>
+          <h1 className="text-3xl font-black text-slate-800 flex items-center gap-3">
+            <Package className="text-[#1D4ED8] w-8 h-8" /> Available Orders
+          </h1>
+          <p className="text-slate-500 font-medium mt-1">Browse and accept delivery requests near you</p>
+        </div>
         <button
           onClick={fetchAvailableOrders}
-          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          className="flex items-center gap-2 bg-[#1D4ED8] text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-800 transition-all shadow-lg active:scale-95"
         >
-          <RefreshCcw size={18} /> Refresh
+          <RefreshCcw size={20} /> Refresh
         </button>
       </div>
 
       {!isOnline && (
-        <div className="bg-yellow-100 border-l-4 border-yellow-500 p-4 mb-6">
-          <p className="text-yellow-700">
+        <div className="bg-white border-l-4 border-[#06B6D4] p-6 rounded-xl shadow-sm mb-8 flex items-center gap-4">
+          <div className="bg-cyan-50 p-3 rounded-full">
+            <Filter className="text-[#06B6D4]" />
+          </div>
+          <p className="text-slate-700 font-medium">
             You are currently offline. Please go online from the{" "}
-            <a href="/driver/dashboard" className="font-bold underline">
+            <a href="/driver/dashboard" className="text-[#1D4ED8] font-bold hover:underline">
               Dashboard
             </a>{" "}
             to see and accept available orders.
@@ -144,42 +150,42 @@ const AvailableOrders = () => {
       )}
 
       {isOnline && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Filters Column */}
-          <div className="md:col-span-1 space-y-4">
-            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-              <h2 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                <Filter size={18} /> Filters
+          <div className="md:col-span-1 space-y-6">
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+              <h2 className="font-black text-slate-800 mb-5 flex items-center gap-2 uppercase tracking-wider text-sm">
+                <Filter size={18} className="text-[#1D4ED8]" /> Filters
               </h2>
               
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <div>
-                  <label className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1 block">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 block">
                     Search Location
                   </label>
                   <div className="relative">
                     <Search
                       size={16}
-                      className="absolute left-3 top-2.5 text-gray-400"
+                      className="absolute left-4 top-3 text-slate-400"
                     />
                     <input
                       type="text"
                       placeholder="City or street..."
                       value={searchCity}
                       onChange={(e) => setSearchCity(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:border-blue-500"
+                      className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]/20 focus:border-[#1D4ED8] transition-all"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1 block">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 block">
                     Max Distance
                   </label>
                   <select
                     value={maxDistance}
                     onChange={(e) => setMaxDistance(e.target.value)}
-                    className="w-full p-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:border-blue-500 bg-white"
+                    className="w-full p-3 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]/20 focus:border-[#1D4ED8] transition-all cursor-pointer appearance-none"
                     disabled={!driverLocation}
                   >
                     <option value="">Any distance</option>
@@ -189,7 +195,7 @@ const AvailableOrders = () => {
                     <option value="50">Within 50 km</option>
                   </select>
                   {!driverLocation && (
-                    <p className="text-[10px] text-orange-500 mt-1">
+                    <p className="text-[10px] text-rose-500 mt-2 font-bold animate-pulse">
                       Waiting for GPS to enable distance filter...
                     </p>
                   )}
@@ -197,78 +203,83 @@ const AvailableOrders = () => {
               </div>
             </div>
 
-            <div className="bg-blue-50 p-4 rounded-xl border border-blue-100">
-              <h3 className="text-sm font-bold text-blue-800 mb-1">Status</h3>
-              <p className="text-xs text-blue-600">
-                Found {filteredAvailableOrders.length} orders near you.
+            <div className="bg-[#1D4ED8] p-6 rounded-2xl shadow-blue-200 shadow-xl text-white">
+              <h3 className="text-xs font-black uppercase tracking-widest opacity-80 mb-2">Live Status</h3>
+              <p className="text-2xl font-black">
+                {filteredAvailableOrders.length}
               </p>
+              <p className="text-xs font-medium opacity-80 mt-1">Orders match your criteria</p>
             </div>
           </div>
 
           {/* Orders List Column */}
           <div className="md:col-span-3">
             {filteredAvailableOrders.length === 0 ? (
-              <div className="bg-white p-10 rounded-xl shadow-sm text-center border border-gray-100">
-                <Package size={48} className="mx-auto text-gray-300 mb-4" />
-                <h3 className="text-lg font-semibold text-gray-700">No orders found</h3>
-                <p className="text-gray-500">
+              <div className="bg-white p-16 rounded-3xl shadow-sm text-center border border-slate-200">
+                <div className="bg-slate-50 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Package size={48} className="text-slate-200" />
+                </div>
+                <h3 className="text-2xl font-black text-slate-800 mb-3">No orders found</h3>
+                <p className="text-slate-500 max-w-sm mx-auto leading-relaxed">
                   {availableOrders.length > 0
-                    ? "Try adjusting your filters to see more results."
-                    : "There are no available orders at the moment. Please check back soon!"}
+                    ? "Try adjusting your filters or search location to see more results."
+                    : "There are no available orders at the moment. We'll alert you when new ones arrive!"}
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {filteredAvailableOrders.map((order) => (
                   <div
                     key={order._id}
-                    className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
+                    className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-xl hover:border-[#1D4ED8]/30 transition-all group"
                   >
-                    <div className="flex justify-between items-start mb-4">
+                    <div className="flex justify-between items-start mb-6">
                       <div>
-                        <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded uppercase tracking-wider">
-                          #{order.order_id}
+                        <span className="text-[10px] font-black text-[#1D4ED8] bg-blue-50 px-3 py-1.5 rounded-full uppercase tracking-widest">
+                          Order #{order.order_id}
                         </span>
-                        <h3 className="font-bold text-gray-800 mt-1">
-                          Delivery to {order.dropoff_address.split(',')[0]}
+                        <h3 className="font-black text-slate-900 mt-3 text-lg">
+                          To {order.dropoff_address.split(',')[0]}
                         </h3>
                       </div>
                       {order.distanceToPickup !== null && (
                         <div className="text-right">
-                          <span className="text-xs font-bold text-green-600">
+                          <span className="text-sm font-black text-[#06B6D4] bg-cyan-50 px-3 py-1.5 rounded-full">
                             {order.distanceToPickup.toFixed(1)} km
                           </span>
-                          <p className="text-[10px] text-gray-400">away</p>
+                          <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase">Away</p>
                         </div>
                       )}
                     </div>
 
-                    <div className="space-y-3 mb-5">
-                      <div className="flex gap-3">
-                        <div className="flex flex-col items-center">
-                          <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                          <div className="w-0.5 h-6 bg-gray-100"></div>
-                          <div className="w-2 h-2 rounded-full bg-red-500"></div>
+                    <div className="space-y-4 mb-8">
+                      <div className="flex gap-4">
+                        <div className="flex flex-col items-center mt-1">
+                          <div className="w-2.5 h-2.5 rounded-full border-2 border-[#06B6D4] bg-white"></div>
+                          <div className="w-0.5 flex-1 bg-slate-100 my-1"></div>
+                          <div className="w-2.5 h-2.5 rounded-full bg-[#1D4ED8]"></div>
                         </div>
-                        <div className="flex-1 space-y-2">
-                          <p className="text-xs text-gray-600 leading-tight">
-                            <span className="font-semibold text-gray-800">Pickup:</span> {order.pickup_address}
-                          </p>
-                          <p className="text-xs text-gray-600 leading-tight">
-                            <span className="font-semibold text-gray-800">Dropoff:</span> {order.dropoff_address}
-                          </p>
+                        <div className="flex-1 space-y-4">
+                          <div>
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-tighter mb-0.5">Pickup</p>
+                            <p className="text-xs font-bold text-slate-700 leading-snug">{order.pickup_address}</p>
+                          </div>
+                          <div>
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-tighter mb-0.5">Drop-off</p>
+                            <p className="text-xs font-bold text-slate-700 leading-snug">{order.dropoff_address}</p>
+                          </div>
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between pt-4 border-t border-gray-50">
+                    <div className="flex items-center justify-between pt-5 border-t border-slate-50">
                       <div>
-                        <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Earnings</p>
-                        <p className="text-lg font-bold text-gray-900">LKR {order.total_cost}</p>
+                        <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-1">Total Earning</p>
+                        <p className="text-2xl font-black text-slate-900">LKR {order.total_cost}</p>
                       </div>
                       <button
                         onClick={() => handleAcceptOrder(order)}
-                        className="bg-black text-white px-6 py-2.5 rounded-lg font-bold text-sm hover:bg-gray-800 transition-colors shadow-sm"
+                        className="bg-slate-900 text-white px-8 py-3.5 rounded-xl font-black text-sm hover:bg-[#1D4ED8] transition-all shadow-lg active:scale-95 group-hover:scale-105"
                       >
                         Accept Order
                       </button>
