@@ -23,6 +23,8 @@ import TrackOrder from "./pages/TrackOrder";
 
 // Driver Imports (Added)
 import DriverDashboard from "./pages/DriverDashboard";
+import DriverLayout from "./components/DriverLayout";
+import DriverEarnings from "./pages/DriverEarnings";
 
 // Admin Protection Component
 function AdminRoute({ children }) {
@@ -122,10 +124,15 @@ function App() {
         path="/driver"
         element={
           <DriverRoute>
-            <DriverDashboard />
+            <DriverLayout />
           </DriverRoute>
         }
-      />
+      >
+        <Route index element={<DriverDashboard />} />
+        <Route path="dashboard" element={<DriverDashboard />} />
+        <Route path="earnings" element={<DriverEarnings />} />
+        <Route path="profile" element={<UserProfile />} />
+      </Route>
 
       {/* Fallback */}
       <Route path="*" element={<Navigate to="/" />} />
