@@ -25,6 +25,7 @@ import TrackOrder from "./pages/TrackOrder";
 import DriverDashboard from "./pages/DriverDashboard";
 import DriverLayout from "./components/DriverLayout";
 import DriverEarnings from "./pages/DriverEarnings";
+import AvailableOrders from "./pages/AvailableOrders";
 
 // Admin Protection Component
 function AdminRoute({ children }) {
@@ -130,6 +131,7 @@ function App() {
       >
         <Route index element={<DriverDashboard />} />
         <Route path="dashboard" element={<DriverDashboard />} />
+        <Route path="available-orders" element={<AvailableOrders />} />
         <Route path="earnings" element={<DriverEarnings />} />
         <Route path="profile" element={<UserProfile />} />
       </Route>

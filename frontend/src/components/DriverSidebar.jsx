@@ -23,6 +23,12 @@ const DriverSidebar = () => {
           active={isActive("/driver/dashboard") || isActive("/driver")} 
         />
         <SidebarLink 
+          to="/driver/available-orders" 
+          icon="📦" 
+          label="Available Orders" 
+          active={isActive("/driver/available-orders")} 
+        />
+        <SidebarLink 
           to="/driver/earnings" 
           icon="💰" 
           label="My Earnings" 
