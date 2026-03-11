@@ -1,6 +1,6 @@
 // src/components/MapComponent.jsx
 import React, { useEffect, useState, useRef } from "react";
-import Map, { Marker, Source, Layer } from "react-map-gl/maplibre";
+import Map, { Marker, Source, Layer, NavigationControl, FullscreenControl } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 import axios from "axios";
 
@@ -46,7 +46,8 @@ const MapComponent = ({ driverLocation, selectedOrder }) => {
         mapRef.current.flyTo({
           center: [driverLocation.lng, driverLocation.lat],
           zoom: 14,
-          duration: 1000,
+          duration: 1500,
+          essential: true
         });
       }
       return;
@@ -73,7 +74,7 @@ const MapComponent = ({ driverLocation, selectedOrder }) => {
               [minLng, minLat],
               [maxLng, maxLat],
             ],
-            { padding: 50, duration: 1000 },
+            { padding: 80, duration: 1500 },
           );
         }
       } catch (error) {
@@ -85,7 +86,7 @@ const MapComponent = ({ driverLocation, selectedOrder }) => {
   }, [driverLocation, destination]);
 
   return (
-    <div className="w-full h-full min-h-[400px] rounded-lg overflow-hidden border shadow-sm relative">
+    <div className="w-full h-full min-h-[400px] rounded-xl overflow-hidden border border-slate-200 shadow-lg relative">
       <Map
         ref={mapRef}
         initialViewState={{
@@ -93,13 +94,30 @@ const MapComponent = ({ driverLocation, selectedOrder }) => {
           latitude: driverLocation?.lat || 6.9271,
           zoom: 13,
         }}
-        // Using MapTiler street style
-        mapStyle={`https://api.maptiler.com/maps/streets-v2/style.json?key=${MAPTILER_KEY}`}
+        // Using MapTiler Voyager style for a professional, clean look
+        mapStyle={`https://api.maptiler.com/maps/voyager/style.json?key=${MAPTILER_KEY}`}
         style={{ width: "100%", height: "100%" }}
       >
+        <NavigationControl position="top-right" />
+        <FullscreenControl position="top-right" />
+
         {/* Draw Navigation Line (Real Roads via ORS) */}
         {routeData && (
           <Source id="route-source" type="geojson" data={routeData}>
+            {/* Outline for the route line to make it pop */}
+            <Layer
+              id="route-layer-outline"
+              type="line"
+              layout={{
+                "line-join": "round",
+                "line-cap": "round",
+              }}
+              paint={{
+                "line-color": "#1e40af", // Darker blue for outline
+                "line-width": 8,
+                "line-opacity": 0.3,
+              }}
+            />
             <Layer
               id="route-layer"
               type="line"
@@ -123,14 +141,19 @@ const MapComponent = ({ driverLocation, selectedOrder }) => {
             anchor="bottom"
           >
             <div className="flex flex-col items-center cursor-pointer group">
-              <div className="bg-black text-white text-xs px-2 py-1 rounded shadow-md mb-1 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                You are here
+              <div className="bg-slate-800 text-white text-[10px] font-medium px-2 py-0.5 rounded-full shadow-lg mb-1 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                Your Location
               </div>
-              <img
-                src="https://cdn-icons-png.flaticon.com/512/3206/3206203.png"
-                alt="Driver"
-                className="w-10 h-10 drop-shadow-md"
-              />
+              <div className="relative">
+                <div className="absolute inset-0 bg-blue-500 rounded-full animate-ping opacity-25"></div>
+                <div className="relative bg-white p-1 rounded-full shadow-xl border-2 border-blue-500">
+                  <img
+                    src="https://cdn-icons-png.flaticon.com/512/3206/3206203.png"
+                    alt="Driver"
+                    className="w-8 h-8"
+                  />
+                </div>
+              </div>
             </div>
           </Marker>
         )}
@@ -143,14 +166,16 @@ const MapComponent = ({ driverLocation, selectedOrder }) => {
             anchor="bottom"
           >
             <div className="flex flex-col items-center cursor-pointer group">
-              <div className="bg-blue-600 text-white text-xs px-2 py-1 rounded shadow-md mb-1 opacity-100 whitespace-nowrap">
-                {destinationAddress}
+              <div className="bg-blue-600 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-lg mb-1 whitespace-nowrap">
+                {destinationAddress.split(": ")[0]}
               </div>
-              <img
-                src="https://cdn-icons-png.flaticon.com/512/684/684908.png"
-                alt="Destination"
-                className="w-10 h-10 drop-shadow-md"
-              />
+              <div className="bg-white p-1 rounded-full shadow-xl border-2 border-red-500">
+                <img
+                  src="https://cdn-icons-png.flaticon.com/512/684/684908.png"
+                  alt="Destination"
+                  className="w-8 h-8"
+                />
+              </div>
             </div>
           </Marker>
         )}
