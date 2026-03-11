@@ -55,7 +55,7 @@ const AdminDashboard = () => {
             const datePart = timestamp.toISOString().split('T')[0].replace(/-/g, ''); 
             const randomPart = Math.floor(1000 + Math.random() * 9000); 
             const reportId = `RX-REV-${filter.toUpperCase()}-${datePart}-${randomPart}`;
-            doc.setFillColor(27, 94, 32); 
+            doc.setFillColor(29, 78, 216); 
             doc.rect(0, 0, 210, 45, 'F');
             doc.setTextColor(255, 255, 255);
             doc.setFontSize(28); doc.setFont("helvetica", "bold"); doc.text("RouteX", 15, 25);
@@ -79,7 +79,7 @@ const AdminDashboard = () => {
                 head: [['Financial Metric', 'Official Data / Valuation']],
                 body: tableBody,
                 theme: 'grid',
-                headStyles: { fillColor: [27, 94, 32], halign: 'center', fontStyle: 'bold' },
+                headStyles: { fillColor: [29, 78, 216], halign: 'center', fontStyle: 'bold' },
                 columnStyles: { 0: { fontStyle: 'bold', cellWidth: 70 }, 1: { halign: 'right' } },
                 styles: { fontSize: 11, cellPadding: 5 }
             });
@@ -90,21 +90,21 @@ const AdminDashboard = () => {
         } catch (err) { console.error("PDF Error:", err); }
     };
 
-    if (loading) return <div className="p-8 text-center font-bold text-[#1B5E20]">Syncing Financial Data...</div>;
+    if (loading) return <div className="p-8 text-center font-bold text-[#1D4ED8]">Syncing Financial Data...</div>;
 
     return (
-        <div className="p-4 md:p-10 bg-[#F9FAFB] min-h-screen">
+        <div className="p-4 md:p-10 bg-[#F1F5F9] min-h-screen">
             {/* Top Bar with Filter, Currency & PDF Button */}
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-10 gap-6">
                 <div>
-                    <h2 className="text-4xl font-black text-gray-800 tracking-tighter uppercase">Executive Overview</h2>
-                    <p className="text-gray-500 font-medium">Real-time financial performance and logistics metrics</p>
+                    <h2 className="text-2xl md:text-4xl font-black text-gray-800 tracking-tighter uppercase">Executive Overview</h2>
+                    <p className="text-sm md:text-base text-gray-500 font-medium">Real-time financial performance and logistics metrics</p>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-3 bg-white p-2 rounded-[1.5rem] shadow-sm border border-gray-100">
+                <div className="flex flex-wrap items-center gap-3 bg-white p-2 rounded-[1.2rem] md:rounded-[1.5rem] shadow-sm border border-gray-100 w-full lg:w-auto">
                     {/* Time Filter */}
                     <select 
-                        className="bg-gray-50 border-none px-4 py-2 rounded-xl text-sm font-bold text-gray-600 outline-none focus:ring-2 focus:ring-[#A5D6A7]"
+                        className="flex-1 lg:flex-none bg-gray-50 border-none px-4 py-2 rounded-xl text-xs md:text-sm font-bold text-gray-600 outline-none focus:ring-2 focus:ring-[#06B6D4]"
                         value={filter}
                         onChange={(e) => setFilter(e.target.value)}
                     >
@@ -113,11 +113,11 @@ const AdminDashboard = () => {
                         <option value="month">Last 30 Days</option>
                     </select>
 
-                    {/* 3. Currency Selector (මෙතනට ඇඩ් කළා) */}
+                    {/* Currency Selector */}
                     <div className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-xl border border-gray-100">
                         <Coins size={16} className="text-gray-400" />
                         <select 
-                            className="bg-transparent border-none text-sm font-bold text-gray-600 outline-none cursor-pointer"
+                            className="bg-transparent border-none text-xs md:text-sm font-bold text-gray-600 outline-none cursor-pointer"
                             value={currency}
                             onChange={(e) => setCurrency(e.target.value)}
                         >
@@ -128,62 +128,64 @@ const AdminDashboard = () => {
                     
                     <button 
                         onClick={handleDownloadPDF}
-                        className="flex items-center gap-2 bg-[#1B5E20] text-white px-6 py-2 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-green-100 hover:bg-[#144718] transition-all"
+                        className="flex-1 lg:flex-none flex items-center justify-center gap-2 bg-[#1D4ED8] text-white px-6 py-2 rounded-xl font-bold text-[10px] md:text-xs uppercase tracking-widest shadow-lg shadow-blue-100 hover:bg-blue-800 transition-all"
                     >
                         <Download size={16} /> Export PDF
                     </button>
                 </div>
             </div>
 
-            {/* Stats Grid - Updated to use formatValue */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+            {/* Stats Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-10">
                 {[
                     { label: 'Platform Profit', val: stats.platformEarnings, icon: <TrendingUp />, color: 'text-blue-600', bg: 'bg-blue-50' },
                     { label: 'Driver Earnings', val: stats.driverEarnings, icon: <ShoppingCart />, color: 'text-orange-600', bg: 'bg-orange-50' },
-                    { label: 'Gross Revenue', val: stats.totalRevenue, icon: <DollarSign />, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+                    { label: 'Gross Revenue', val: stats.totalRevenue, icon: <DollarSign />, color: 'text-cyan-600', bg: 'bg-cyan-50' },
                     { label: 'Deliveries', val: stats.totalDeliveries, icon: <CheckCircle />, color: 'text-purple-600', bg: 'bg-purple-50', noPrefix: true }
                 ].map((s, i) => (
                     <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}
-                        className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 flex items-center justify-between group hover:shadow-md transition-all">
+                        className="bg-white p-5 md:p-6 rounded-[1.5rem] md:rounded-[2rem] shadow-sm border border-gray-100 flex items-center justify-between group hover:shadow-md transition-all">
                         <div>
-                            <p className="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">{s.label}</p>
-                            <h3 className="text-2xl font-black text-gray-800">
+                            <p className="text-gray-400 text-[9px] md:text-[10px] font-black uppercase tracking-widest mb-1">{s.label}</p>
+                            <h3 className="text-xl md:text-2xl font-black text-gray-800">
                                 {formatValue(s.val, s.noPrefix)}
                             </h3>
                         </div>
-                        <div className={`${s.bg} ${s.color} p-4 rounded-2xl`}>{s.icon}</div>
+                        <div className={`${s.bg} ${s.color} p-3 md:p-4 rounded-xl md:rounded-2xl`}>{s.icon}</div>
                     </motion.div>
                 ))}
             </div>
 
             {/* Chart Area */}
-            <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100">
+            <div className="bg-white p-5 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] shadow-sm border border-gray-100">
                 <div className="flex items-center gap-3 mb-8">
-                    <Calendar className="text-[#A5D6A7]" />
-                    <h3 className="text-xl font-black text-gray-800 uppercase tracking-tighter">Revenue Growth Pattern ({currency})</h3>
+                    <Calendar className="text-[#06B6D4]" />
+                    <h3 className="text-lg md:text-xl font-black text-gray-800 uppercase tracking-tighter">Revenue Growth Pattern ({currency})</h3>
                 </div>
-                <div className="h-[400px] w-full">
-                    {chartData.length > 0 ? (
-                        <ResponsiveContainer>
-                            <BarChart data={chartData}>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
-                                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94A3B8', fontSize: 12, fontWeight: 'bold'}} />
-                                <YAxis axisLine={false} tickLine={false} tick={{fill: '#94A3B8', fontSize: 12, fontWeight: 'bold'}} />
-                                <Tooltip 
-                                    cursor={{fill: '#F8FAFC'}} 
-                                    contentStyle={{borderRadius: '15px', border: 'none', boxShadow: '10px 10px 15px rgba(0,0,0,0.05)'}} 
-                                    formatter={(value) => formatValue(value)} // Tooltip එකෙත් මුදල් ඒකකය පෙන්වීමට
-                                />
-                                <Bar dataKey="revenue" fill="#1B5E20" radius={[10, 10, 0, 0]} barSize={50}>
-                                    {chartData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={index === chartData.length - 1 ? '#A5D6A7' : '#1B5E20'} />
-                                    ))}
-                                </Bar>
-                            </BarChart>
-                        </ResponsiveContainer>
-                    ) : (
-                        <div className="h-full flex items-center justify-center text-gray-400 font-bold uppercase tracking-widest">No data for this period</div>
-                    )}
+                <div className="h-[300px] md:h-[400px] w-full overflow-x-auto">
+                    <div className="h-full min-w-[600px] lg:min-w-0">
+                        {chartData.length > 0 ? (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={chartData}>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
+                                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94A3B8', fontSize: 10, fontWeight: 'bold'}} />
+                                    <YAxis axisLine={false} tickLine={false} tick={{fill: '#94A3B8', fontSize: 10, fontWeight: 'bold'}} />
+                                    <Tooltip 
+                                        cursor={{fill: '#F8FAFC'}} 
+                                        contentStyle={{borderRadius: '15px', border: 'none', boxShadow: '10px 10px 15px rgba(0,0,0,0.05)'}} 
+                                        formatter={(value) => formatValue(value)} 
+                                    />
+                                    <Bar dataKey="revenue" fill="#1D4ED8" radius={[10, 10, 0, 0]} barSize={window.innerWidth < 768 ? 30 : 50}>
+                                        {chartData.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={index === chartData.length - 1 ? '#06B6D4' : '#1D4ED8'} />
+                                        ))}
+                                    </Bar>
+                                </BarChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <div className="h-full flex items-center justify-center text-gray-400 font-bold uppercase tracking-widest">No data for this period</div>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>
