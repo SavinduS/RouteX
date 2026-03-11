@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Mail, Phone, MessageSquare, History, X, Send, AlertCircle, User, ArrowRight, Clock, Package } from 'lucide-react';
+import { Search, Mail, Phone, MessageSquare, History, X, Send, AlertCircle, User, ArrowRight, Clock, Package, Edit, Trash2 } from 'lucide-react';
 import API from '../services/api';
 
 const AdminUsers = () => {
@@ -50,6 +50,21 @@ const AdminUsers = () => {
                 handleOpenPanel(selectedUser, 'complains'); // Refresh live data
             }
         } catch (err) { alert("Failed to send reply"); }
+    };
+
+    const handleDeleteReply = async (inquiryId) => {
+        if (!window.confirm("Are you sure you want to delete this reply?")) return;
+        try {
+            const res = await API.delete(`/admin/inquiries/reply/${inquiryId}`);
+            if (res.data.success) {
+                handleOpenPanel(selectedUser, 'complains'); // Refresh live data
+            }
+        } catch (err) { alert("Failed to delete reply"); }
+    };
+
+    const handleEditReply = (item) => {
+        setReplyText(item.admin_reply);
+        setActiveInquiryId(item._id);
     };
 
     const filteredUsers = entrepreneurs.filter(user => 
@@ -159,22 +174,34 @@ const AdminUsers = () => {
                                                     <h5 className="font-black text-gray-800 text-sm uppercase tracking-tight">{item.subject}</h5>
                                                     <p className="text-gray-600 text-sm leading-relaxed font-medium italic">"{item.message}"</p>
                                                     
-                                                    {item.admin_reply ? (
-                                                        <div className="mt-4 p-5 bg-white rounded-2xl border-l-4 border-[#1B5E20] shadow-sm">
-                                                            <p className="text-[10px] font-black text-[#1B5E20] uppercase mb-1">Official Response</p>
+                                                    {item.admin_reply && activeInquiryId !== item._id ? (
+                                                        <div className="mt-4 p-5 bg-white rounded-2xl border-l-4 border-[#1B5E20] shadow-sm group/reply">
+                                                            <div className="flex justify-between items-start mb-1">
+                                                                <p className="text-[10px] font-black text-[#1B5E20] uppercase">Official Response</p>
+                                                                <div className="flex gap-2 opacity-0 group-hover/reply:opacity-100 transition-opacity">
+                                                                    <button onClick={() => handleEditReply(item)} className="p-1.5 bg-gray-50 text-gray-400 hover:text-[#1B5E20] rounded-lg transition-colors"><Edit size={12}/></button>
+                                                                    <button onClick={() => handleDeleteReply(item._id)} className="p-1.5 bg-gray-50 text-gray-400 hover:text-red-500 rounded-lg transition-colors"><Trash2 size={12}/></button>
+                                                                </div>
+                                                            </div>
                                                             <p className="text-sm font-bold text-gray-700">{item.admin_reply}</p>
                                                         </div>
                                                     ) : (
                                                         <div className="pt-4 border-t border-gray-200">
                                                             {activeInquiryId === item._id ? (
-                                                                <div className="flex gap-2">
-                                                                    <input 
-                                                                        className="flex-1 bg-white border border-gray-200 text-sm p-3 rounded-xl outline-none focus:ring-2 focus:ring-[#1B5E20]"
-                                                                        placeholder="Type your reply..."
-                                                                        value={replyText}
-                                                                        onChange={(e) => setReplyText(e.target.value)}
-                                                                    />
-                                                                    <button onClick={() => handleSendReply(item._id)} className="bg-[#1B5E20] text-white p-3 rounded-xl hover:bg-[#144718] transition-all shadow-lg shadow-emerald-50"><Send size={18}/></button>
+                                                                <div className="flex flex-col gap-2">
+                                                                    <div className="flex gap-2">
+                                                                        <input 
+                                                                            className="flex-1 bg-white border border-gray-200 text-sm p-3 rounded-xl outline-none focus:ring-2 focus:ring-[#1B5E20]"
+                                                                            placeholder="Type your reply..."
+                                                                            value={replyText}
+                                                                            onChange={(e) => setReplyText(e.target.value)}
+                                                                            autoFocus
+                                                                        />
+                                                                        <button onClick={() => handleSendReply(item._id)} className="bg-[#1B5E20] text-white p-3 rounded-xl hover:bg-[#144718] transition-all shadow-lg shadow-emerald-50"><Send size={18}/></button>
+                                                                        {item.admin_reply && (
+                                                                            <button onClick={() => { setActiveInquiryId(null); setReplyText(''); }} className="p-3 bg-gray-100 text-gray-500 rounded-xl hover:bg-gray-200 transition-all"><X size={18}/></button>
+                                                                        )}
+                                                                    </div>
                                                                 </div>
                                                             ) : (
                                                                 <button onClick={() => setActiveInquiryId(item._id)} className="text-[10px] font-black text-[#1B5E20] uppercase flex items-center gap-1 hover:gap-2 transition-all">Reply to inquiry <ArrowRight size={12}/></button>

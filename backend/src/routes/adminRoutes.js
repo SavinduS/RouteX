@@ -17,6 +17,7 @@ const {
   getUserOrders,
   getUserInquiries,
   replyToInquiry,
+  deleteInquiryReply,
   checkAndMarkDelays,
 } = require('../controllers/adminController');
 
@@ -47,6 +48,7 @@ router.put('/users/verify-driver/:id', verifyDriver);
 router.get('/users/entrepreneur/:userId/orders', getUserOrders);
 router.get('/users/entrepreneur/:userId/inquiries', getUserInquiries);
 router.put('/inquiries/reply/:id', replyToInquiry);
+router.delete('/inquiries/reply/:id', deleteInquiryReply);
 
 // Orders Management
 router.get('/orders', getAllOrders);

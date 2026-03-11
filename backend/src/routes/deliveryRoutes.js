@@ -1,18 +1,25 @@
 const express = require('express');
 const router = express.Router();
+const auth = require('../middleware/auth');
+const role = require('../middleware/role');
 const {
-  createDelivery,
-  getDeliveryById,
-  updateDelivery,
-  getMyDeliveries,
-  getOrderTracking // මේක උඩින් import කරගන්න
+    createDelivery,
+    updateDelivery,
+    deleteDelivery,
+    getMyDeliveries,
+    getOrderTracking
 } = require('../controllers/deliveryController');
 
-router.route('/my').get(getMyDeliveries); 
-router.route('/').post(createDelivery);
+// All routes are protected by JWT Auth
+router.use(auth);
 
-// Tracking route එක ID එකට පස්සේ දාන්න
-router.route('/:id').get(getDeliveryById).put(updateDelivery);
-router.route("/:id/track").get(getOrderTracking);
+// Entrepreneur specific routes
+router.get('/my', role('entrepreneur'), getMyDeliveries);
+router.post('/', role('entrepreneur'), createDelivery);
+
+// Item specific routes
+router.get('/:id/track', getOrderTracking);
+router.put('/:id', role('entrepreneur'), updateDelivery);
+router.delete('/:id', role('entrepreneur'), deleteDelivery);
 
 module.exports = router;

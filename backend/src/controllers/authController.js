@@ -71,6 +71,23 @@ exports.register = async (req, res) => {
       auth_provider: "local",
     });
 
+    const { sendNotification } = require("../utils/notificationService");
+    if (role === "entrepreneur") {
+      await sendNotification({
+        type: "new_entrepreneur",
+        message: `New Entrepreneur registered: ${full_name}`,
+        relatedId: newUser._id,
+        relatedModel: "User",
+      });
+    } else if (role === "driver") {
+      await sendNotification({
+        type: "new_driver",
+        message: `New Driver registered: ${full_name}`,
+        relatedId: newUser._id,
+        relatedModel: "User",
+      });
+    }
+
     const token = jwt.sign(
       { id: newUser._id, role: newUser.role },
       process.env.JWT_SECRET,
@@ -171,6 +188,14 @@ exports.googleLogin = async (req, res) => {
         role: "entrepreneur",
         user_id: await generateUserCode("entrepreneur"),
         is_verified: true,
+      });
+
+      const { sendNotification } = require("../utils/notificationService");
+      await sendNotification({
+        type: "new_entrepreneur",
+        message: `New Entrepreneur registered via Google: ${user.full_name}`,
+        relatedId: user._id,
+        relatedModel: "User",
       });
     } else {
       if (!user.google_id) user.google_id = googleId;
