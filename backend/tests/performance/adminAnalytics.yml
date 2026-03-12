@@ -1,0 +1,19 @@
+config:
+  target: "http://localhost:5003"
+  phases:
+    - duration: 15
+      arrivalRate: 5
+      name: "Sustained Load"
+  defaults:
+    headers:
+      Authorization: "Bearer {{ $processEnvironment.ADMIN_TOKEN }}"
+
+scenarios:
+  - name: "Admin Dashboard Performance"
+    flow:
+      - get:
+          url: "/api/admin/analytics/revenue"
+      - get:
+          url: "/api/admin/orders"
+      - get:
+          url: "/api/admin/rules"

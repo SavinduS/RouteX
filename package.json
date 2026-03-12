@@ -20,6 +20,7 @@
   "dependencies": {
     "@auth0/auth0-react": "^2.15.0",
     "axios": "^1.13.5",
+    "nodemailer": "^8.0.1",
     "react-router-dom": "^7.13.0"
   }
 }
