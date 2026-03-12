@@ -40,7 +40,7 @@ function AdminRoute({ children }) {
   }
 }
 
-// Entrepreneur Protection Component
+// Entrepreneur Protection Component 
 function EntrepreneurRoute({ children }) {
   const token = localStorage.getItem("token");
   const storedUser = localStorage.getItem("user");
