@@ -38,7 +38,7 @@ function AdminRoute({ children }) {
   }
 }
 
-// Entrepreneur Protection Component (අලුතින් එකතු කළා)
+// Entrepreneur Protection Component 
 function EntrepreneurRoute({ children }) {
   const token = localStorage.getItem("token");
   const storedUser = localStorage.getItem("user");
