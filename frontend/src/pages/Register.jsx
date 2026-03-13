@@ -123,7 +123,7 @@ export default function Register() {
     "absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-xl text-[#1D4ED8] hover:bg-slate-100 transition";
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-200 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-slate-200 px-4 py-8">
       {/* smaller card */}
       <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl px-8 py-7">
         {/* Close */}

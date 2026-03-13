@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import api from "../services/api";
 import Navbar from "../components/Navbar";
+import { useNavigate } from "react-router-dom";
 import {
   Eye,
   EyeOff,
@@ -159,6 +160,7 @@ function PwInput({
 }
 
 export default function UserProfile() {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [form, setForm] = useState({});
   const [editing, setEditing] = useState(false);
@@ -345,18 +347,32 @@ export default function UserProfile() {
 };
 
   if (!user) return null;
+  
+  const isAdmin = user?.role === "admin";
 
   const tabs = [
-    { id: "info", label: "Personal Info" },
-    { id: "security", label: "Security" },
-  ];
+  { id: "info", label: "Personal Info" },
+  { id: "security", label: "Security" },
+];
+
 
   //  user_id
   const displayUserId = user?.user_id || "—";
 
   return (
     <div className="min-h-screen bg-[#F1F5F9]" style={{ fontFamily: "'DM Sans', sans-serif" }}>
-      <Navbar />
+      {!isAdmin && <Navbar />}
+
+      {isAdmin && (
+        <div className="max-w-5xl mx-auto px-4 sm:px-5 pt-6 sm:pt-8">
+          <button
+            onClick={() => navigate(-1)}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-white text-slate-800 border border-slate-200 shadow-sm hover:bg-slate-50 active:scale-95 transition-all"
+          >
+            ← Back
+          </button>
+        </div>
+      )}
 
       <div className="max-w-5xl mx-auto px-4 sm:px-5 py-6 sm:py-10 grid lg:grid-cols-[268px_1fr] gap-4 sm:gap-6 items-start">
         {/* SIDEBAR */}

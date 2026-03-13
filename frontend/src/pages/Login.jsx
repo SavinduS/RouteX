@@ -22,7 +22,7 @@ export default function Login() {
     setError("");
     const { name, value } = e.target;
 
-    // keep email clean (optional but nice)
+    // email
     if (name === "email") {
       setForm((p) => ({ ...p, email: value }));
       return;
@@ -92,8 +92,7 @@ export default function Login() {
     "absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-xl text-[#1D4ED8] hover:bg-slate-100 transition";
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-200 px-4">
-      {/* Register එක වගේ smaller card */}
+    <div className="min-h-screen flex items-center justify-center bg-slate-200 px-4 py-8">
       <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl px-8 py-7">
         {/* Close */}
         <button
@@ -157,7 +156,7 @@ export default function Login() {
             </div>
           </div>
 
-          {/* Login Button (same size as Google) */}
+          {/* Login Button */}
           <button
             type="submit"
             disabled={loading || googleLoading}
@@ -166,7 +165,6 @@ export default function Login() {
             {loading ? "Logging in..." : "Login"}
           </button>
 
-          {/* more space between Login & Google (like Register) */}
           <div className="mt-5">
             <GoogleSignInButton
               fullWidth
