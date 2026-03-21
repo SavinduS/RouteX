@@ -8,6 +8,8 @@ const verifiedDriver = require("../middleware/verifiedDriver");
 const {
   updateLocation,
   getAvailableOrders,
+  getActiveOrders,
+  getDeliveryHistory,
   acceptOrder,
   updateOrderStatus,
 } = require("../controllers/driverController");
@@ -18,8 +20,13 @@ router.use(auth, role("driver"), verifiedDriver);
 router.route("/location").post(updateLocation);
 
 // 2. Fetch Available Orders for Drivers (GET /api/driver/orders/available?vehicle_type=bike)
-// Make sure this comes BEFORE any route with /:id if you add ID routes later
 router.route("/orders/available").get(getAvailableOrders);
+
+// Fetch Active Orders (assigned/picked_up)
+router.route("/orders/active").get(getActiveOrders);
+
+// Fetch Delivery History (delivered)
+router.route("/orders/history").get(getDeliveryHistory);
 
 // 3. Accept an Order (POST /api/driver/orders/accept)
 router.route("/orders/accept").post(acceptOrder);

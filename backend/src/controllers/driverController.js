@@ -59,6 +59,47 @@ exports.getAvailableOrders = async (req, res) => {
   }
 };
 
+// Fetch Active Orders for a Driver (assigned or picked_up)
+exports.getActiveOrders = async (req, res) => {
+  try {
+    // Assuming the driver's ID is available in req.user.id from the auth middleware
+    const driver_id = req.user.id;
+
+    const orders = await Order.find({
+      driver_id,
+      status: { $in: ["assigned", "picked_up", "in_transit"] },
+    }).sort({ updated_at: -1 });
+
+    res.status(200).json({
+      success: true,
+      count: orders.length,
+      data: orders,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// Fetch Delivery History for a Driver (delivered or cancelled)
+exports.getDeliveryHistory = async (req, res) => {
+  try {
+    const driver_id = req.user.id;
+
+    const history = await DeliveryHistory.find({
+      driver_id,
+      final_status: "delivered", // We mainly want successful orders for earnings
+    }).sort({ completed_at: -1 });
+
+    res.status(200).json({
+      success: true,
+      count: history.length,
+      data: history,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
 // 3. Accept/Confirm an Order
 exports.acceptOrder = async (req, res) => {
   try {

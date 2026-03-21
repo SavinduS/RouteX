@@ -16,7 +16,7 @@ const server = http.createServer(app);
 const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:5173";
 const PORT = process.env.PORT || 5003;
 
-// Initialize Socket.io only once
+// Initialize Socket.io
 const io = new Server(server, {
   cors: {
     origin: [CLIENT_URL],
@@ -66,14 +66,18 @@ app.get("/", (req, res) => {
 });
 
 // Database Connection and Server Start
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => {
-    console.log("✅ MongoDB Connected Successfully");
-    server.listen(PORT, () => {
-      console.log(`🚀 Server running on port ${PORT}`);
+if (process.env.NODE_ENV !== 'test') {
+  mongoose
+    .connect(process.env.MONGO_URI)
+    .then(() => {
+      console.log("✅ MongoDB Connected Successfully");
+      server.listen(PORT, () => {
+        console.log(`🚀 Server running on port ${PORT}`);
+      });
+    })
+    .catch((err) => {
+      console.error("❌ MongoDB Connection Failed:", err.message);
     });
-  })
-  .catch((err) => {
-    console.error("❌ MongoDB Connection Failed:", err.message);
-  });
+}
+
+module.exports = { app, server, io };
