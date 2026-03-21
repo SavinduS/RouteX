@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, NavLink, useNavigate } from "react-router-dom";
-import { ChevronDown, LogOut, UserCircle2, Menu, X } from "lucide-react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Menu, X, Truck } from "lucide-react";
 
 const getInitials = (u) =>
   (u?.full_name || u?.email || "U")
@@ -12,7 +12,8 @@ const getInitials = (u) =>
 
 export default function Navbar() {
   const navigate = useNavigate();
-  const [openProfile, setOpenProfile] = useState(false);
+  const location = useLocation();
+
   const [openMobile, setOpenMobile] = useState(false);
   const [activeSection, setActiveSection] = useState("top");
 
@@ -24,24 +25,23 @@ export default function Navbar() {
     } catch {
       return null;
     }
-  }, []);
+  }, [location.pathname]);
 
   const isLoggedIn = !!localStorage.getItem("token");
 
-  // close dropdown on outside click
   useEffect(() => {
     const handler = (e) => {
       if (!dropdownRef.current) return;
-      if (!dropdownRef.current.contains(e.target)) setOpenProfile(false);
+      if (!dropdownRef.current.contains(e.target)) {
+        // placeholder if dropdown added later
+      }
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  // close menus on route change (simple)
   useEffect(() => {
     const close = () => {
-      setOpenProfile(false);
       setOpenMobile(false);
     };
     window.addEventListener("hashchange", close);
@@ -56,36 +56,22 @@ export default function Navbar() {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     window.dispatchEvent(new Event("storage"));
-    setOpenProfile(false);
     setOpenMobile(false);
     navigate("/");
   };
 
-  const linkBase =
-  "px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200";
+  const linkBase = "px-4 py-2 rounded-[16px] text-[14px] font-bold transition-all duration-200";
 
-const linkInactive =
-  "text-slate-700 hover:text-[#1D4ED8] hover:bg-[#F8FAFC]";
+  const linkInactive = "text-slate-700 hover:text-[#1D4ED8] hover:bg-slate-50";
 
-const linkActive =
-  "text-[#1D4ED8] bg-[#DBEAFE] shadow-sm";
-
-  const NavItem = ({ to, label }) => (
-    <NavLink
-      to={to}
-      className={({ isActive }) =>
-        `${linkBase} ${isActive ? linkActive : linkInactive}`
-      }
-      end={to === "/"}
-    >
-      {label}
-    </NavLink>
-  );
+  const linkActive = "text-[#1D4ED8] bg-[#DBEAFE] shadow-sm";
 
   useEffect(() => {
     const sections = ["top", "about", "services", "contact"];
 
     const handleScroll = () => {
+      if (location.pathname !== "/") return;
+
       const scrollPosition = window.scrollY + 120;
 
       for (let i = sections.length - 1; i >= 0; i--) {
@@ -97,100 +83,133 @@ const linkActive =
       }
     };
 
-    handleScroll();
-    window.addEventListener("scroll", handleScroll);
+    if (location.pathname === "/") {
+      const hash = location.hash?.replace("#", "");
+      if (hash && sections.includes(hash)) {
+        setActiveSection(hash);
+      } else {
+        handleScroll();
+      }
+    }
 
+    window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [location.pathname, location.hash]);
+
+  const handleBrandClick = (e) => {
+    e.preventDefault();
+    setOpenMobile(false);
+
+    if (location.pathname === "/") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      setActiveSection("top");
+      navigate("/#top", { replace: true });
+    } else {
+      navigate("/#top");
+    }
+  };
+
+  const sectionLinkClass = (section) => {
+  const isHomeRoute = location.pathname === "/";
+  const isProfileLikeRoute = location.pathname !== "/";
+
+  const isActive =
+    (isHomeRoute && activeSection === section) ||
+    (isProfileLikeRoute && section === "top");
+
+  return `${linkBase} ${isActive ? linkActive : linkInactive}`;
+};
 
   return (
-    <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-slate-200">
-      <div className="max-w-6xl mx-auto px-5 py-3 flex items-center justify-between gap-6">        {/* Brand */}
-        <Link to="/" className="flex items-center gap-2">
-        <div className="w-9 h-9 rounded-2xl bg-[#1D4ED8] shadow-sm" />
-        <span className="text-lg font-extrabold text-slate-900">RouteX</span>
+    <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur-md">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-5 py-3">
+        {/* Brand */}
+        <Link
+            to="/#top"
+            onClick={handleBrandClick}
+            className="flex items-center gap-3 shrink-0"
+          >
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#1D4ED8] shadow-sm">
+            <Truck size={22} className="text-white" />
+          </div>
+
+          <div className="leading-none">
+            <h1 className="text-[20px] sm:text-[22px] font-black tracking-tight text-slate-900">
+              Route<span className="text-cyan-500">X</span>
+            </h1>
+            <p className="mt-1 text-[10px] uppercase tracking-[0.32em] text-slate-400 font-semibold">
+              Logistics Platform
+            </p>
+          </div>
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-1 bg-white rounded-2xl p-1 border border-slate-200 flex-shrink-0">
-          <a
-            href="#top"
-            className={`${linkBase} ${activeSection === "top" ? linkActive : linkInactive}`}
-          >
+        <nav className="hidden md:flex items-center gap-1 rounded-[20px] border border-slate-200 bg-white p-1 shadow-sm">
+          <Link to="/#top" className={sectionLinkClass("top")}>
             Home
-          </a>
-          <a
-            href="#about"
-            className={`${linkBase} ${activeSection === "about" ? linkActive : linkInactive}`}
-          >
+          </Link>
+          <Link to="/#about" className={sectionLinkClass("about")}>
             About
-          </a>
-          <a
-            href="#services"
-            className={`${linkBase} ${activeSection === "services" ? linkActive : linkInactive}`}
-          >
+          </Link>
+          <Link to="/#services" className={sectionLinkClass("services")}>
             Services
-          </a>
-          <a
-            href="#contact"
-            className={`${linkBase} ${activeSection === "contact" ? linkActive : linkInactive}`}
-          >
+          </Link>
+          <Link to="/#contact" className={sectionLinkClass("contact")}>
             Contact
-          </a>
+          </Link>
         </nav>
 
         {/* Right actions */}
-        <div className="hidden md:flex items-center gap-2 flex-shrink-0 relative z-10">
-        {!isLoggedIn ? (
-          <>
-            <Link
-              to="/login"
-              className="px-4 py-2 rounded-xl text-sm font-bold text-slate-700 hover:bg-[#F1F5F9] transition"
-            >
-              Login
-            </Link>
-            <Link
-              to="/register"
-              className="px-4 py-2 rounded-xl text-sm font-bold text-white bg-[#06B6D4] hover:bg-[#0891B2] active:scale-95 transition"
-            >
-              Register
-            </Link>
-          </>
-        ) : (
-          <div className="flex items-center gap-4">
-            {/* Clickable User Info */}
-            <div
-              onClick={() => navigate("/profile")}
-              className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition"
-            >
-              <div className="w-10 h-10 rounded-full bg-[#1D4ED8] text-white font-bold flex items-center justify-center">
-                {getInitials(user)}
+        <div className="hidden md:flex items-center gap-3 shrink-0">
+          {!isLoggedIn ? (
+            <>
+              <Link
+                to="/login"
+                className="rounded-2xl px-4 py-2 text-sm font-bold text-slate-700 transition hover:bg-slate-100"
+              >
+                Login
+              </Link>
+
+              <Link
+                to="/register"
+                className="rounded-2xl bg-cyan-500 px-4 py-2 text-sm font-bold text-white transition hover:bg-cyan-600 active:scale-95"
+              >
+                Register
+              </Link>
+            </>
+          ) : (
+            <div className="flex items-center gap-4">
+              <div
+                onClick={() => navigate("/profile")}
+                className="flex cursor-pointer items-center gap-3 transition hover:opacity-80"
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#1D4ED8] text-base font-bold text-white">
+                  {getInitials(user)}
+                </div>
+
+                <div className="leading-tight">
+                  <p className="text-[15px] font-bold text-slate-900 leading-tight">
+                    {user?.full_name || "User"}
+                  </p>
+                  <p className="text-[13px] capitalize text-slate-500 leading-tight">
+                    {user?.role}
+                  </p>
+                </div>
               </div>
 
-              <div className="leading-tight">
-                <p className="text-sm font-bold text-slate-900">
-                  {user?.full_name || "User"}
-                </p>
-                <p className="text-xs text-slate-500 capitalize">
-                  {user?.role}
-                </p>
-              </div>
+              <button
+                onClick={logout}
+                className="rounded-2xl border border-red-400 px-5 py-2 text-sm font-semibold text-red-500 transition hover:bg-red-50"
+              >
+                Logout
+              </button>
             </div>
-
-            {/* Logout Button */}
-            <button
-              onClick={logout}
-              className="px-4 py-2 rounded-xl border border-red-500 text-red-500 font-semibold text-sm hover:bg-red-50 transition"
-            >
-              Logout
-            </button>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
 
         {/* Mobile menu button */}
         <button
-          className="md:hidden p-2 rounded-xl border border-slate-200 hover:bg-[#F1F5F9]"
+          className="rounded-xl border border-slate-200 p-2 transition hover:bg-slate-100 md:hidden"
           onClick={() => setOpenMobile((s) => !s)}
           aria-label="Toggle menu"
         >
@@ -200,50 +219,50 @@ const linkActive =
 
       {/* Mobile dropdown */}
       {openMobile && (
-        <div className="md:hidden border-t border-slate-200 bg-white">
-          <div className="max-w-6xl mx-auto px-5 py-4 space-y-2">
+        <div className="border-t border-slate-200 bg-white md:hidden">
+          <div className="mx-auto max-w-7xl space-y-3 px-5 py-4">
             <div className="grid gap-2">
-              <a
-                href="#top"
+              <Link
+                to="/#top"
                 onClick={() => setOpenMobile(false)}
-                className={`block ${linkBase} ${activeSection === "top" ? linkActive : linkInactive}`}
+                className={`block ${sectionLinkClass("top")}`}
               >
                 Home
-              </a>
+              </Link>
 
-              <a
-                href="#about"
+              <Link
+                to="/#about"
                 onClick={() => setOpenMobile(false)}
-                className={`block ${linkBase} ${activeSection === "about" ? linkActive : linkInactive}`}
+                className={`block ${sectionLinkClass("about")}`}
               >
                 About
-              </a>
+              </Link>
 
-              <a
-                href="#services"
+              <Link
+                to="/#services"
                 onClick={() => setOpenMobile(false)}
-                className={`block ${linkBase} ${activeSection === "services" ? linkActive : linkInactive}`}
+                className={`block ${sectionLinkClass("services")}`}
               >
                 Services
-              </a>
+              </Link>
 
-              <a
-                href="#contact"
+              <Link
+                to="/#contact"
                 onClick={() => setOpenMobile(false)}
-                className={`block ${linkBase} ${activeSection === "contact" ? linkActive : linkInactive}`}
+                className={`block ${sectionLinkClass("contact")}`}
               >
                 Contact
-              </a>
+              </Link>
             </div>
 
-            <div className="h-px bg-slate-200 my-2" />
+            <div className="my-2 h-px bg-slate-200" />
 
             {!isLoggedIn ? (
               <div className="grid gap-2">
                 <Link
                   to="/login"
                   onClick={() => setOpenMobile(false)}
-                  className="w-full text-center px-4 py-2 rounded-xl text-sm font-bold text-slate-700 bg-[#F1F5F9] hover:bg-slate-200 transition"
+                  className="w-full rounded-xl bg-slate-100 px-4 py-3 text-center text-sm font-bold text-slate-700 transition hover:bg-slate-200"
                 >
                   Login
                 </Link>
@@ -251,7 +270,7 @@ const linkActive =
                 <Link
                   to="/register"
                   onClick={() => setOpenMobile(false)}
-                  className="w-full text-center px-4 py-2 rounded-xl text-sm font-bold text-white bg-[#06B6D4] hover:bg-[#0891B2] transition"
+                  className="w-full rounded-xl bg-cyan-500 px-4 py-3 text-center text-sm font-bold text-white transition hover:bg-cyan-600"
                 >
                   Register
                 </Link>
@@ -263,14 +282,14 @@ const linkActive =
                     setOpenMobile(false);
                     navigate("/profile");
                   }}
-                  className="w-full text-left px-4 py-3 rounded-xl text-sm font-semibold text-slate-700 bg-[#F1F5F9] hover:bg-slate-200 transition"
+                  className="w-full rounded-xl bg-slate-100 px-4 py-3 text-left text-sm font-semibold text-slate-700 transition hover:bg-slate-200"
                 >
                   Profile
                 </button>
 
                 <button
                   onClick={logout}
-                  className="w-full text-left px-4 py-3 rounded-xl text-sm font-semibold text-red-600 bg-red-50 hover:bg-red-100 transition"
+                  className="w-full rounded-xl bg-red-50 px-4 py-3 text-left text-sm font-semibold text-red-600 transition hover:bg-red-100"
                 >
                   Logout
                 </button>

@@ -374,7 +374,7 @@ export default function UserProfile() {
         </div>
       )}
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-5 py-6 sm:py-10 grid lg:grid-cols-[268px_1fr] gap-4 sm:gap-6 items-start">
+      <div className="max-w-5xl mx-auto px-4 sm:px-5 pt-8 sm:pt-10 pb-6 sm:pb-10 grid lg:grid-cols-[268px_1fr] gap-4 sm:gap-6 items-start">
         {/* SIDEBAR */}
         <aside className="space-y-4">
           <div className="bg-white rounded-3xl p-5 sm:p-6 text-center shadow-sm border border-slate-100">

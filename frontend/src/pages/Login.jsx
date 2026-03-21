@@ -8,7 +8,10 @@ export default function Login() {
   const navigate = useNavigate();
 
   const getRedirectPathByRole = (role) => {
-    if (role === "admin") return "/admin";
+    const normalizedRole = String(role || "").trim().toLowerCase();
+
+    if (normalizedRole === "admin") return "/admin";
+    if (normalizedRole === "driver") return "/driver/dashboard";
     return "/";
   };
 
@@ -21,14 +24,7 @@ export default function Login() {
   const handleChange = (e) => {
     setError("");
     const { name, value } = e.target;
-
-    // email
-    if (name === "email") {
-      setForm((p) => ({ ...p, email: value }));
-      return;
-    }
-
-    setForm((p) => ({ ...p, [name]: value }));
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const goHome = () => navigate("/");
@@ -52,12 +48,20 @@ export default function Login() {
 
       const { data } = await api.post("/auth/login", payload);
 
+      console.log("LOGIN RESPONSE:", data);
+      console.log("USER:", data?.user);
+      console.log("ROLE:", data?.user?.role);
+
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user || {}));
       window.dispatchEvent(new Event("storage"));
 
-      navigate(getRedirectPathByRole(data?.user?.role));
+      const redirectPath = getRedirectPathByRole(data?.user?.role);
+      console.log("REDIRECT PATH:", redirectPath);
+
+      navigate(redirectPath);
     } catch (err) {
+      console.error("LOGIN ERROR:", err);
       setError(err?.response?.data?.message || "Login failed");
     } finally {
       setLoading(false);
@@ -71,22 +75,27 @@ export default function Login() {
 
       const { data } = await api.post("/auth/google", { credential: idToken });
 
+      console.log("GOOGLE LOGIN RESPONSE:", data);
+      console.log("GOOGLE ROLE:", data?.user?.role);
+
       localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
+      localStorage.setItem("user", JSON.stringify(data.user || {}));
       window.dispatchEvent(new Event("storage"));
 
-      navigate(getRedirectPathByRole(data?.user?.role));
-    } catch {
-      setError("Google authentication failed");
+      const redirectPath = getRedirectPathByRole(data?.user?.role);
+      console.log("GOOGLE REDIRECT PATH:", redirectPath);
+
+      navigate(redirectPath);
+    } catch (err) {
+      console.error("GOOGLE LOGIN ERROR:", err);
+      setError(err?.response?.data?.message || "Google authentication failed");
     } finally {
       setGoogleLoading(false);
     }
   };
 
   const inputCls =
-    "mt-1.5 w-full h-11 rounded-2xl border border-slate-200 bg-[#F1F8FF] px-4 text-sm outline-none " +
-    "focus:ring-2 focus:ring-[#06B6D4] " +
-    "[&::-ms-reveal]:hidden [&::-ms-clear]:hidden";
+    "mt-1.5 w-full h-11 rounded-2xl border border-slate-200 bg-[#F1F8FF] px-4 text-sm outline-none focus:ring-2 focus:ring-[#06B6D4] [&::-ms-reveal]:hidden [&::-ms-clear]:hidden";
 
   const iconBtnCls =
     "absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-xl text-[#1D4ED8] hover:bg-slate-100 transition";
@@ -94,7 +103,6 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-200 px-4 py-8">
       <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl px-8 py-7">
-        {/* Close */}
         <button
           type="button"
           onClick={goHome}
@@ -114,7 +122,6 @@ export default function Login() {
         )}
 
         <form onSubmit={handleSubmit} className="mt-5 space-y-4">
-          {/* Email */}
           <div>
             <label className="text-xs font-semibold text-slate-700">Email</label>
             <input
@@ -128,7 +135,6 @@ export default function Login() {
             />
           </div>
 
-          {/* Password */}
           <div>
             <label className="text-xs font-semibold text-slate-700">
               Password
@@ -147,7 +153,7 @@ export default function Login() {
 
               <button
                 type="button"
-                onClick={() => setShowPw((s) => !s)}
+                onClick={() => setShowPw((prev) => !prev)}
                 className={iconBtnCls}
                 aria-label={showPw ? "Hide password" : "Show password"}
               >
@@ -156,7 +162,6 @@ export default function Login() {
             </div>
           </div>
 
-          {/* Login Button */}
           <button
             type="submit"
             disabled={loading || googleLoading}
@@ -175,7 +180,6 @@ export default function Login() {
             />
           </div>
 
-          {/* Bottom link */}
           <p className="text-center mt-4 text-sm text-slate-600">
             No account?{" "}
             <Link to="/register" className="text-[#1D4ED8] font-semibold">
