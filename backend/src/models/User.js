@@ -83,6 +83,13 @@ const UserSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+
+    user_id: {
+      type: String,
+      unique: true,
+      sparse: true,
+      index: true,
+    },
   },
   { timestamps: true }
 );

@@ -103,8 +103,7 @@ function App() {
         <Route path="couriers" element={<AdminCouriers />} />
         <Route path="entrepreneurs" element={<AdminUsers />} />
       </Route>
-
-      {/* 4. Entrepreneur Routes */}
+      {/* Entrepreneur Routes (Protected & Layout Attached) */}
       <Route
         path="/entrepreneur"
         element={

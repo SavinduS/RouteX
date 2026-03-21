@@ -66,24 +66,24 @@ export default function Register() {
     setError("");
 
     if (!form.full_name.trim()) {
-  return setError("Full name is required");
-}
+      return setError("Full name is required");
+    }
 
-if (!form.email.trim()) {
-  return setError("Email is required");
-}
+    if (!form.email.trim()) {
+      return setError("Email is required");
+    }
 
-if (form.phone_number.length !== 10) {
-  return setError("Phone number must be exactly 10 digits");
-}
+    if (form.phone_number.length !== 10) {
+      return setError("Phone number must be exactly 10 digits");
+    }
 
-if (isDriver && !form.license_number.trim()) {
-  return setError("License number is required for drivers");
-}
+    if (isDriver && !form.license_number.trim()) {
+      return setError("License number is required for drivers");
+    }
 
-if (form.password.length < 6) {
-  return setError("Password must be at least 6 characters");
-}
+    if (form.password.length < 5) {
+      return setError("Password must be at least 5 characters");
+    }
 
     if (form.password !== form.confirm_password) {
       return setError("Passwords do not match");
@@ -123,7 +123,7 @@ if (form.password.length < 6) {
     "absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-xl text-[#1D4ED8] hover:bg-slate-100 transition";
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-200 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-slate-200 px-4 py-8">
       {/* smaller card */}
       <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl px-8 py-7">
         {/* Close */}
@@ -266,7 +266,7 @@ if (form.password.length < 6) {
                   value={form.password}
                   onChange={handleChange}
                   className={`${inputCls} pr-12`}
-                  placeholder="Minimum 6 characters"
+                  placeholder="Minimum 5 characters"
                   autoComplete="new-password"
                 />
                 <button
