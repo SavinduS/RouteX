@@ -5,7 +5,30 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        poppins: ['Poppins', 'sans-serif'],
+      },
+      keyframes: {
+        'marquee-custom': {
+          'from': { transform: 'translateX(0)' },
+          'to': { transform: 'translateX(-50%)' },
+        },
+        'pulse-custom': {
+          '0%, 100%': { boxShadow: '0 0 0 0 rgba(6,182,212,0.5)' },
+          '50%': { boxShadow: '0 0 0 6px rgba(6,182,212,0)' },
+        },
+        'float-custom': {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-8px)' },
+        },
+      },
+      animation: {
+        'marquee-custom': 'marquee-custom 22s linear infinite',
+        'pulse-custom': 'pulse-custom 2s ease-in-out infinite',
+        'float-custom': 'float-custom 4s ease-in-out infinite',
+      },
+    },
   },
   plugins: [],
 }

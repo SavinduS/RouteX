@@ -39,10 +39,18 @@ const Footer = () => {
           </p>
 
           <div className="flex items-center justify-center gap-4 md:justify-start">
-            {[Facebook, Twitter, Instagram, Linkedin].map((Icon, i) => (
+            {[
+              { Icon: Facebook, href: "https://facebook.com", label: "Facebook" },
+              { Icon: Twitter, href: "https://twitter.com", label: "Twitter" },
+              { Icon: Instagram, href: "https://instagram.com", label: "Instagram" },
+              { Icon: Linkedin, href: "https://linkedin.com", label: "Linkedin" },
+            ].map(({ Icon, href, label }, i) => (
               <a
                 key={i}
-                href="#"
+                href={href}
+                aria-label={label}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="rounded-full border border-slate-600 bg-slate-800 p-2.5 text-slate-100 transition-all duration-300 hover:border-cyan-500 hover:bg-cyan-500 hover:text-white"
               >
                 <Icon size={18} />
@@ -63,18 +71,13 @@ const Footer = () => {
               </a>
             </li>
             <li>
-              <a href="#services" className="transition-colors hover:text-cyan-500">
-                Services
-              </a>
-            </li>
-            <li>
-              <a href="/track" className="transition-colors hover:text-cyan-500">
-                Track Order
-              </a>
-            </li>
-            <li>
               <a href="#about" className="transition-colors hover:text-cyan-500">
                 About Us
+              </a>
+            </li>
+            <li>
+              <a href="#services" className="transition-colors hover:text-cyan-500">
+                Services
               </a>
             </li>
             <li>
