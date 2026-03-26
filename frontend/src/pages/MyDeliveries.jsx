@@ -2,18 +2,28 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getMyDeliveries } from "../services/deliveryService";
 
+const statusConfig = {
+  available:  { label: "Pending",    className: "bg-amber-100 text-amber-700 border-amber-200" },
+  assigned:   { label: "Assigned",   className: "bg-blue-100 text-blue-700 border-blue-200" },
+  picked_up:  { label: "Picked Up",  className: "bg-violet-100 text-violet-700 border-violet-200" },
+  in_transit: { label: "In Transit", className: "bg-cyan-100 text-cyan-700 border-cyan-200" },
+  delivered:  { label: "Delivered",  className: "bg-emerald-100 text-emerald-700 border-emerald-200" },
+};
+const getStatusCfg = (status) =>
+  statusConfig[status] ?? { label: status, className: "bg-slate-100 text-slate-600 border-slate-200" };
+
+const vehicleEmoji = { bike: "🏍", tuktuk: "🛺", van: "🚐", truck: "🚛" };
+
 const MyDeliveries = () => {
   const [deliveries, setDeliveries] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [loading, setLoading]       = useState(true);
+  const [error, setError]           = useState(null);
 
   useEffect(() => {
     const fetchDeliveries = async () => {
       try {
-        const token = localStorage.getItem('token') || "DUMMY_TOKEN"; 
+        const token = localStorage.getItem("token") || "DUMMY_TOKEN";
         const data = await getMyDeliveries(token);
-        
-        // Backend එකෙන් එන response එක අනුව data.orders හෝ data ලබා ගනී
         setDeliveries(data.orders || data);
         setLoading(false);
       } catch (err) {
@@ -21,119 +31,163 @@ const MyDeliveries = () => {
         setLoading(false);
       }
     };
-
     fetchDeliveries();
   }, []);
 
-  // Status එක අනුව Badge එකේ වර්ණය තීරණය කරන function එක
-  const getStatusStyle = (status) => {
-    switch (status) {
-      case 'available': return { bg: '#FFF9C4', text: '#FBC02D' }; // කහ
-      case 'assigned': return { bg: '#E3F2FD', text: '#1976D2' };  // නිල්
-      case 'picked_up': return { bg: '#F3E5F5', text: '#7B1FA2' }; // දම්
-      case 'in_transit': return { bg: '#E0F2F1', text: '#00796B' }; // කොළ ලා
-      case 'delivered': return { bg: '#E8F5E9', text: '#2E7D32' };  // තද කොළ
-      default: return { bg: '#F5F5F5', text: '#616161' };
-    }
-  };
-
-  if (loading) return <h2 style={{ textAlign: "center", marginTop: "50px", color: "#1B5E20" }}>Loading Deliveries...</h2>;
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-screen bg-[#F1F5F9]">
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-10 h-10 rounded-full border-4 border-[#1D4ED8]/20 border-t-[#1D4ED8] animate-spin" />
+        <p className="text-slate-500 text-sm font-medium">Loading deliveries…</p>
+      </div>
+    </div>
+  );
 
   return (
-    <div style={{ padding: "30px", fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" }}>
-      
-      {/* Title සහ New Request බටන් එක */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "25px" }}>
-        <h1 style={{ color: "#1B5E20", fontSize: "24px", margin: 0 }}>My Delivery Requests</h1>
+    <div className="min-h-screen bg-[#F1F5F9] p-6 lg:p-8">
+
+      {/* ── Header ── */}
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-2xl lg:text-3xl font-extrabold text-slate-900 tracking-tight">
+            My Delivery Requests
+          </h1>
+          <p className="text-slate-400 text-sm mt-1">
+            {deliveries.length} order{deliveries.length !== 1 ? "s" : ""} found
+          </p>
+        </div>
         <Link to="/entrepreneur/create-delivery">
-          <button style={{ 
-            padding: "12px 20px", 
-            background: "#1B5E20", 
-            color: "white", 
-            border: "none", 
-            borderRadius: "6px", 
-            cursor: "pointer",
-            fontWeight: "bold",
-            fontSize: "15px",
-            boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
-          }}>
-            + New Delivery Request
+          <button className="flex items-center gap-2 px-5 py-2.5 bg-[#1D4ED8] hover:bg-[#1E40AF] active:scale-95 text-white text-sm font-bold rounded-xl shadow-lg shadow-[#1D4ED8]/25 transition-all">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            New Delivery Request
           </button>
         </Link>
       </div>
 
-      {error && <p style={{ color: "red", textAlign: "center", background: "#FFEBEE", padding: "10px" }}>{error}</p>}
+      {/* ── Error ── */}
+      {error && (
+        <div className="mb-6 flex items-center gap-2 bg-red-50 border border-red-100 text-red-600 text-sm font-semibold px-4 py-3 rounded-xl">
+          ⚠️ {error}
+        </div>
+      )}
 
+      {/* ── Empty State ── */}
       {deliveries.length === 0 ? (
-        <div style={{ textAlign: "center", padding: "40px", background: "#f9f9f9", borderRadius: "10px" }}>
-           <p>No delivery requests found.</p>
+        <div className="flex flex-col items-center justify-center py-24 bg-white rounded-2xl shadow-sm border border-slate-100">
+          <div className="w-16 h-16 rounded-2xl bg-[#1D4ED8]/10 flex items-center justify-center text-3xl mb-4">📦</div>
+          <p className="text-slate-700 font-bold text-lg">No delivery requests yet</p>
+          <p className="text-slate-400 text-sm mt-1">Create your first request to get started.</p>
+          <Link to="/entrepreneur/create-delivery">
+            <button className="mt-5 px-6 py-2.5 bg-[#1D4ED8] hover:bg-[#1E40AF] text-white text-sm font-bold rounded-xl transition-colors">
+              + New Delivery Request
+            </button>
+          </Link>
         </div>
       ) : (
-        <div style={{ overflowX: "auto", boxShadow: "0 4px 12px rgba(0,0,0,0.1)", borderRadius: "10px" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", background: "white" }}>
-            <thead>
-              <tr style={{ background: "#E8F5E9", textAlign: "left" }}>
-                <th style={{ padding: "15px", borderBottom: "2px solid #ddd" }}>Date</th>
-                <th style={{ padding: "15px", borderBottom: "2px solid #ddd" }}>Order ID</th> {/* අලුත් Column එක */}
-                <th style={{ padding: "15px", borderBottom: "2px solid #ddd" }}>Pickup Address</th>
-                <th style={{ padding: "15px", borderBottom: "2px solid #ddd" }}>Dropoff Address</th>
-                <th style={{ padding: "15px", borderBottom: "2px solid #ddd" }}>Vehicle</th>
-                <th style={{ padding: "15px", borderBottom: "2px solid #ddd" }}>Status</th>
-                <th style={{ padding: "15px", borderBottom: "2px solid #ddd" }}>Cost (LKR)</th>
-                <th style={{ padding: "15px", borderBottom: "2px solid #ddd", textAlign: "center" }}>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {deliveries.map((delivery) => {
-                const statusStyle = getStatusStyle(delivery.status);
-                return (
-                  <tr key={delivery._id} style={{ borderBottom: "1px solid #eee" }}>
-                    <td style={{ padding: "15px" }}>{new Date(delivery.created_at).toLocaleDateString()}</td>
-                    
-                    {/* අලුත් Readable Order ID එක මෙතන පෙන්වයි */}
-                    <td style={{ padding: "15px", fontWeight: "bold", color: "#333" }}>{delivery.order_id || "N/A"}</td>
-                    
-                    <td style={{ padding: "15px" }}>{delivery.pickup_address}</td>
-                    <td style={{ padding: "15px" }}>{delivery.dropoff_address}</td>
-                    <td style={{ padding: "15px", textTransform: "capitalize" }}>{delivery.vehicle_type}</td>
-                    <td style={{ padding: "15px" }}>
-                      <span style={{ 
-                          padding: "5px 12px", 
-                          borderRadius: "20px", 
-                          fontSize: "11px", 
-                          fontWeight: "bold",
-                          background: statusStyle.bg, 
-                          color: statusStyle.text,
-                          textTransform: "uppercase",
-                          display: "inline-block",
-                          minWidth: "80px",
-                          textAlign: "center"
-                      }}>
-                        {delivery.status}
-                      </span>
-                    </td>
-                    <td style={{ padding: "15px", fontWeight: "600" }}>{delivery.total_cost.toLocaleString()} LKR</td>
-                    <td style={{ padding: "15px", textAlign: "center" }}>
-                      <Link to={`/entrepreneur/track/${delivery._id}`}>
-                        <button style={{ 
-                          padding: "8px 14px", 
-                          background: "#4CAF50", 
-                          color: "white", 
-                          border: "none", 
-                          borderRadius: "4px", 
-                          cursor: "pointer",
-                          fontSize: "13px",
-                          transition: "0.3s"
-                        }}>
-                          View Details
-                        </button>
-                      </Link>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+        /* ── Table ── */
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-[#F8FAFC] border-b border-slate-100">
+                  {["Date", "Order ID", "Pickup Address", "Dropoff Address", "Vehicle", "Status", "Cost (LKR)", "Action"].map((h) => (
+                    <th
+                      key={h}
+                      className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-widest text-slate-400 whitespace-nowrap"
+                    >
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {deliveries.map((delivery, i) => {
+                  const cfg = getStatusCfg(delivery.status);
+                  return (
+                    <tr
+                      key={delivery._id}
+                      className={`border-b border-slate-50 hover:bg-blue-50/40 transition-colors ${
+                        i % 2 === 0 ? "bg-white" : "bg-[#FAFBFC]"
+                      }`}
+                    >
+                      {/* Date */}
+                      <td className="px-5 py-4 text-slate-500 whitespace-nowrap">
+                        {new Date(delivery.created_at).toLocaleDateString("en-GB", {
+                          day: "2-digit", month: "short", year: "numeric"
+                        })}
+                      </td>
+
+                      {/* Order ID */}
+                      <td className="px-5 py-4">
+                        <span className="font-bold text-[#1D4ED8]">
+                          #{delivery.order_id || "N/A"}
+                        </span>
+                      </td>
+
+                      {/* Pickup */}
+                      <td className="px-5 py-4 max-w-[180px]">
+                        <p className="text-slate-700 truncate" title={delivery.pickup_address}>
+                          {delivery.pickup_address}
+                        </p>
+                      </td>
+
+                      {/* Dropoff */}
+                      <td className="px-5 py-4 max-w-[180px]">
+                        <p className="text-slate-700 truncate" title={delivery.dropoff_address}>
+                          {delivery.dropoff_address}
+                        </p>
+                      </td>
+
+                      {/* Vehicle */}
+                      <td className="px-5 py-4 whitespace-nowrap">
+                        <span className="capitalize text-slate-600 font-medium">
+                          {vehicleEmoji[delivery.vehicle_type] || "🚗"} {delivery.vehicle_type}
+                        </span>
+                      </td>
+
+                      {/* Status */}
+                      <td className="px-5 py-4">
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold uppercase border ${cfg.className}`}>
+                          {cfg.label}
+                        </span>
+                      </td>
+
+                      {/* Cost */}
+                      <td className="px-5 py-4 font-bold text-slate-800 whitespace-nowrap">
+                        {delivery.total_cost.toLocaleString()}
+                        <span className="text-xs font-normal text-slate-400 ml-1">LKR</span>
+                      </td>
+
+                      {/* Action */}
+                      <td className="px-5 py-4 text-center">
+                        <Link to={`/entrepreneur/track/${delivery._id}`}>
+                          <button className="px-4 py-2 bg-[#06B6D4]/10 hover:bg-[#06B6D4] text-[#06B6D4] hover:text-white border border-[#06B6D4]/30 text-xs font-bold rounded-lg transition-all whitespace-nowrap">
+                            View Details
+                          </button>
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Table Footer */}
+          <div className="px-5 py-3 border-t border-slate-100 bg-[#F8FAFC] flex items-center justify-between">
+            <p className="text-xs text-slate-400 font-medium">
+              Showing <span className="text-slate-600 font-bold">{deliveries.length}</span> order{deliveries.length !== 1 ? "s" : ""}
+            </p>
+            <div className="flex items-center gap-1.5">
+              {Object.entries(statusConfig).map(([, v]) => (
+                <span key={v.label} className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${v.className}`}>
+                  {v.label}
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -17,7 +17,7 @@ const sendNotification = async (data) => {
     await notification.save();
 
     if (io) {
-      io.emit("new_notification", notification);
+      io.to("admins").emit("new_notification", notification);
     }
     return notification;
   } catch (error) {
