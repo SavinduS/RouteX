@@ -1,0 +1,24 @@
+config:
+  target: "http://localhost:5003"
+  phases:
+    - duration: 10
+      arrivalRate: 2
+      name: "Driver Load Test"
+  defaults:
+    headers:
+      Authorization: "Bearer {{ $processEnvironment.DRIVER_TOKEN }}"
+
+scenarios:
+  - name: "Driver Operations Performance"
+    flow:
+      - get:
+          url: "/api/driver/orders/available?vehicle_type=bike"
+      - get:
+          url: "/api/driver/orders/active"
+      - post:
+          url: "/api/driver/location"
+          json:
+            driver_id: "69d69bf6ba0f059dd8c06132"
+            lat: 6.9271
+            lng: 79.8612
+            driver_status: "online"
