@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "test": "NODE_ENV=test jest --runInBand",
+    "test": "cross-env NODE_ENV=test jest --runInBand",
     "test:unit": "NODE_ENV=test jest tests/unit",
     "test:integration": "NODE_ENV=test jest tests/integration --runInBand",
     "test:perf": "artillery run tests/performance/adminAnalytics.yml"
@@ -29,7 +29,8 @@
     "socket.io": "^4.8.3"
   },
   "devDependencies": {
-    "artillery": "^2.0.21",
+    "artillery": "^2.0.30",
+    "cross-env": "^10.1.0",
     "jest": "^30.3.0",
     "jsonwebtoken": "^9.0.3",
     "nodemon": "^3.1.14",

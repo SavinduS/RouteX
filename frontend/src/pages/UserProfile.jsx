@@ -214,6 +214,9 @@ export default function UserProfile() {
   }, []);
 
   const isDriver = user?.role === "driver";
+  const isAdmin = user?.role === "admin";
+  const shouldHideNavbar = isAdmin || isDriver;
+
   const memberSince = useMemo(() => formatDate(user?.createdAt), [user?.createdAt]);
 
   const handleChange = (e) => {
@@ -347,8 +350,6 @@ export default function UserProfile() {
 };
 
   if (!user) return null;
-  
-  const isAdmin = user?.role === "admin";
 
   const tabs = [
   { id: "info", label: "Personal Info" },
@@ -361,7 +362,7 @@ export default function UserProfile() {
 
   return (
     <div className="min-h-screen bg-[#F1F5F9]" style={{ fontFamily: "'DM Sans', sans-serif" }}>
-      {!isAdmin && <Navbar />}
+      {!shouldHideNavbar && <Navbar />}
 
       {isAdmin && (
         <div className="max-w-5xl mx-auto px-4 sm:px-5 pt-6 sm:pt-8">
