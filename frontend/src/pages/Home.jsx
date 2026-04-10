@@ -138,7 +138,7 @@ function Hero() {
 
           <div ref={r4} className="rx3-reveal delay-3 flex flex-wrap gap-[14px]">
             <Link
-              to="/login"
+              to="/entrepreneur/create-delivery"
               className="inline-flex min-w-[180px] h-[50px] items-center justify-center gap-2 rounded-[16px] border border-white/10 bg-[#1D4ED8] px-6 py-[13px] font-['Poppins'] text-[12px] font-bold uppercase tracking-[0.1em] text-white shadow-[0_8px_18px_rgba(29,78,216,0.20)] transition-all duration-300 no-underline hover:bg-[#2563EB] hover:-translate-y-0.5 hover:shadow-[0_12px_24px_rgba(29,78,216,0.28)]"
             >
               Place Order <ArrowRight size={16} />
