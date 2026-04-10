@@ -18,7 +18,9 @@ import AdminUsers from "./pages/AdminUsers";
 import EntrepreneurLayout from "./components/EntrepreneurLayout";
 import EntrepreneurDashboard from "./pages/EntrepreneurDashboard";
 import MyDeliveries from "./pages/MyDeliveries";
+import MyHistory from "./pages/MyHistory";
 import CreateDelivery from "./pages/CreateDelivery";
+import UpdateDelivery from "./pages/UpdateDelivery";
 import TrackOrder from "./pages/TrackOrder";
 
 // Driver Imports (Added)
@@ -115,7 +117,9 @@ function App() {
         <Route index element={<EntrepreneurDashboard />} />
         <Route path="dashboard" element={<EntrepreneurDashboard />} />
         <Route path="my-deliveries" element={<MyDeliveries />} />
+        <Route path="my-history" element={<MyHistory />} />
         <Route path="create-delivery" element={<CreateDelivery />} />
+        <Route path="update-delivery/:id" element={<UpdateDelivery />} />
         <Route path="track/:id" element={<TrackOrder />} />
       </Route>
 

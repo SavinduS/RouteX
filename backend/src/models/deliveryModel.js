@@ -11,7 +11,7 @@ const orderSchema = new mongoose.Schema({
   driver_id: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
   status: {
     type: String,
-    enum: ["available", "assigned", "picked_up", "in_transit"],
+    enum: ["available", "assigned", "picked_up", "in_transit", "delivered"],
     default: "available",
   },
   vehicle_type: { type: String, required: true },

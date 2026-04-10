@@ -253,7 +253,6 @@ export default function UserProfile() {
   const handleSave = async () => {
     setMessage("");
 
-    //  validations (like register)
     const fullName = (form.full_name || "").trim();
     const email = (form.email || "").trim().toLowerCase();
     const phone = (form.phone_number || "").trim();
@@ -261,9 +260,7 @@ export default function UserProfile() {
     if (!fullName) return setMessage("Full name is required");
     if (!email) return setMessage("Email is required");
 
-    // phone: only digits, must be 10
-    const digitsOnly = phone.replace(/\D/g, "");
-    if (digitsOnly.length !== 10)
+    if (phone.length !== 10)
       return setMessage("Phone number must be exactly 10 digits");
 
     // stricter email format check

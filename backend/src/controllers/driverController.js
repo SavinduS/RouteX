@@ -201,7 +201,8 @@ exports.updateOrderStatus = async (req, res) => {
         await driverLocation.save();
       }
 
-      await Order.findByIdAndDelete(order_id);
+      // UPDATE: Don't delete, just update status
+      await Order.findByIdAndUpdate(order_id, { status: "delivered" });
 
       try {
         const entrepreneur = await User.findById(order.user_id);

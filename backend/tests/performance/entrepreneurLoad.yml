@@ -1,0 +1,31 @@
+config:
+  target: "http://localhost:5003"
+  phases:
+    - duration: 15
+      arrivalRate: 5
+      name: "Entrepreneur Traffic Simulation"
+  defaults:
+    headers:
+      Authorization: "Bearer {{ $processEnvironment.ENTREPRENEUR_TOKEN }}"
+
+scenarios:
+  - name: "Entrepreneur Dashboard & History Operations"
+    flow:
+      - get:
+          url: "/api/deliveries/my"
+      - get:
+          url: "/api/deliveries/history" # For future or existing history endpoint
+      - post:
+          url: "/api/deliveries"
+          json:
+            pickup_address: "Pickup Place 1"
+            pickup_lat: 6.9271
+            pickup_lng: 79.8612
+            dropoff_address: "Dropoff Place 2"
+            dropoff_lat: 6.9500
+            dropoff_lng: 79.9000
+            package_size: "medium"
+            vehicle_type: "van"
+            receiver_name: "Jane Smith"
+            receiver_phone: "0771234567"
+            receiver_email: "jane@test.com"

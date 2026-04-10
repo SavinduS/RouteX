@@ -7,6 +7,9 @@
     "dev": "nodemon src/server.js",
     "test": "cross-env NODE_ENV=test jest --runInBand",
     "test:unit": "NODE_ENV=test jest tests/unit",
+    "test:entrepreneur:unit": "NODE_ENV=test jest tests/unit/deliveryController.test.js",
+    "test:entrepreneur:integration": "NODE_ENV=test jest tests/integration/deliveryRoutes.test.js --runInBand",
+    "test:entrepreneur:perf": "artillery run tests/performance/entrepreneurLoad.yml",
     "test:integration": "NODE_ENV=test jest tests/integration --runInBand",
     "test:perf": "artillery run tests/performance/adminAnalytics.yml"
   },

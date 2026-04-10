@@ -1,4 +1,5 @@
 const axios = require('axios');
+const mongoose = require('mongoose');
 const Order = require('../models/deliveryModel'); 
 const DriverLocation = require('../models/DriverLocation'); 
 const { calculateFare } = require('../utils/pricingLogic'); 
@@ -92,14 +93,58 @@ const deleteDelivery = async (req, res) => {
 // @desc    Get order tracking and driver location
 const getOrderTracking = async (req, res) => {
   try {
-    const order = await Order.findById(req.params.id);
+    const order = await Order.findById(req.params.id).populate("driver_id", "full_name phone_number");
     if (!order) return res.status(404).json({ message: "Order not found" });
 
     let driverLoc = null;
     if (order.driver_id) {
-        driverLoc = await DriverLocation.findOne({ driver_id: order.driver_id }).sort({ recorded_at: -1 });
+        const driverId = order.driver_id._id || order.driver_id;
+        driverLoc = await DriverLocation.findOne({ driver_id: driverId }).sort({ recorded_at: -1 });
     }
     res.json({ order, driverLocation: driverLoc });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Get order tracking and driver location by human-readable Order ID or MongoDB ID
+const getOrderByReadableId = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    
+    // Try finding by readable order_id first, then by MongoDB _id
+    let order = await Order.findOne({ order_id: orderId }).populate("driver_id", "full_name phone_number");
+    
+    if (!order && mongoose.Types.ObjectId.isValid(orderId)) {
+      order = await Order.findById(orderId).populate("driver_id", "full_name phone_number");
+    }
+    
+    if (!order) {
+      return res.status(404).json({ message: "Order not found with the provided ID." });
+    }
+
+    // Security Check: Only the owner (Entrepreneur) can track their own order
+    const requesterId = req.user.id;
+    const ownerId = order.user_id.toString();
+
+    if (requesterId !== ownerId) {
+      return res.status(403).json({ 
+        message: "Forbidden: You do not have permission to track this order." 
+      });
+    }
+
+    let driverLocation = null;
+    if (order.driver_id) {
+      driverLocation = await DriverLocation.findOne({ 
+        driver_id: order.driver_id 
+      }).sort({ recorded_at: -1 });
+    }
+
+    res.json({
+      success: true,
+      order,
+      driverLocation
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -109,7 +154,8 @@ module.exports = {
   createDelivery,
   getDeliveryById,
   updateDelivery,
-  deleteDelivery, // Now this will work because the function is defined above
+  deleteDelivery, 
   getMyDeliveries,
-  getOrderTracking
+  getOrderTracking,
+  getOrderByReadableId
 };

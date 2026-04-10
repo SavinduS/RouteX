@@ -7,7 +7,8 @@ const {
     updateDelivery,
     deleteDelivery,
     getMyDeliveries,
-    getOrderTracking
+    getOrderTracking,
+    getOrderByReadableId
 } = require('../controllers/deliveryController');
 
 // All routes are protected by JWT Auth
@@ -16,6 +17,7 @@ router.use(auth);
 // Entrepreneur specific routes
 router.get('/my', role('entrepreneur'), getMyDeliveries);
 router.post('/', role('entrepreneur'), createDelivery);
+router.get('/track/:orderId', role('entrepreneur'), getOrderByReadableId);
 
 // Item specific routes
 router.get('/:id/track', getOrderTracking);
