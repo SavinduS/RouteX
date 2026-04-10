@@ -66,15 +66,15 @@ const EntrepreneurSidebar = () => {
     >
       {/* Logo */}
       <div className="px-8 py-8">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-slate-900 flex items-center justify-center shadow-lg shadow-slate-200">
+        <Link to="/" className="flex items-center gap-3 no-underline group">
+          <div className="w-10 h-10 rounded-2xl bg-slate-900 flex items-center justify-center shadow-lg shadow-slate-200 transition-transform group-hover:scale-105 active:scale-95">
             <Zap size={20} className="text-white fill-white" />
           </div>
           <div className="leading-none">
             <span className="text-slate-900 text-xl font-black tracking-tighter block">RouteX</span>
             <span className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-0.5 block">Entrepreneur</span>
           </div>
-        </div>
+        </Link>
       </div>
 
       {/* Nav Links */}
