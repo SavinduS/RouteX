@@ -3,20 +3,16 @@ import DriverSidebar from "./DriverSidebar";
 
 const DriverLayout = () => {
   return (
-    <div style={{ display: "flex" }}>
+    <div className="flex min-h-screen bg-[#f4f7f6]">
       {/* Sidebar on the left */}
       <DriverSidebar />
 
       {/* Main content on the right */}
-      <div style={{ 
-        marginLeft: "250px", 
-        width: "calc(100% - 250px)", 
-        minHeight: "100vh", 
-        background: "#f4f7f6",
-        padding: "20px"
-      }}>
-        <Outlet /> 
-      </div>
+      <main className="flex-1 transition-all duration-300 md:ml-64 p-4 md:p-8 pt-20 md:pt-8">
+        <div className="max-w-7xl mx-auto">
+          <Outlet /> 
+        </div>
+      </main>
     </div>
   );
 };
