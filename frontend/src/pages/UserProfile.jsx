@@ -220,22 +220,35 @@ export default function UserProfile() {
   const memberSince = useMemo(() => formatDate(user?.createdAt), [user?.createdAt]);
 
   const handleChange = (e) => {
-  const { name, value } = e.target;
+    const { name, value } = e.target;
 
-  if (name === "phone_number") {
-    const digitsOnly = value.replace(/\D/g, "").slice(0, 10);
-    setForm((p) => ({ ...p, phone_number: digitsOnly }));
-    return;
-  }
+    if (name === "phone_number") {
+      const digitsOnly = value.replace(/\D/g, "").slice(0, 10);
+      setForm((p) => ({ ...p, phone_number: digitsOnly }));
+      return;
+    }
 
-  if (name === "full_name") {
-    const cleanName = value.replace(/[^a-zA-Z\s]/g, "");
-    setForm((p) => ({ ...p, full_name: cleanName }));
-    return;
-  }
+    if (name === "full_name") {
+      const cleanName = value.replace(/[^a-zA-Z\s]/g, "");
+      setForm((p) => ({ ...p, full_name: cleanName }));
+      return;
+    }
 
-  setForm((p) => ({ ...p, [name]: value }));
-};
+    if (name === "email") {
+      // Allow only alphanumeric, @ and .
+      // Also prevent multiple @ symbols
+      let cleanEmail = value.replace(/[^a-zA-Z0-9@.]/g, "");
+      const atCount = (cleanEmail.match(/@/g) || []).length;
+      if (atCount > 1) {
+        const parts = cleanEmail.split("@");
+        cleanEmail = parts[0] + "@" + parts.slice(1).join("").replace(/@/g, "");
+      }
+      setForm((p) => ({ ...p, email: cleanEmail }));
+      return;
+    }
+
+    setForm((p) => ({ ...p, [name]: value }));
+  };
 
   const handleSave = async () => {
     setMessage("");
@@ -253,8 +266,8 @@ export default function UserProfile() {
     if (digitsOnly.length !== 10)
       return setMessage("Phone number must be exactly 10 digits");
 
-    // simple email format check
-    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    // stricter email format check
+    const emailOk = /^[a-zA-Z0-9.]+@[a-zA-Z0-9.]+\.[a-zA-Z]{2,}$/.test(email);
     if (!emailOk) return setMessage("Please enter a valid email address");
 
     try {
