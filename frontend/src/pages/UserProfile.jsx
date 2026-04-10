@@ -217,27 +217,35 @@ export default function UserProfile() {
   const memberSince = useMemo(() => formatDate(user?.createdAt), [user?.createdAt]);
 
   const handleChange = (e) => {
-  const { name, value } = e.target;
+    const { name, value } = e.target;
 
-  if (name === "phone_number") {
-    const digitsOnly = value.replace(/\D/g, "").slice(0, 10);
-    setForm((p) => ({ ...p, phone_number: digitsOnly }));
-    return;
-  }
+    if (name === "phone_number") {
+      const digitsOnly = value.replace(/\D/g, "").slice(0, 10);
+      setForm((p) => ({ ...p, phone_number: digitsOnly }));
+      return;
+    }
 
-  if (name === "full_name") {
-    const cleanName = value.replace(/[^a-zA-Z\s]/g, "");
-    setForm((p) => ({ ...p, full_name: cleanName }));
-    return;
-  }
+    if (name === "full_name") {
+      const cleanName = value.replace(/[^a-zA-Z\s]/g, "");
+      setForm((p) => ({ ...p, full_name: cleanName }));
+      return;
+    }
 
-  setForm((p) => ({ ...p, [name]: value }));
-};
+    if (name === "email") {
+      let val = value.toLowerCase().replace(/[^a-z0-9@.]/g, "");
+      if (val.length > 0 && /^[0-9]/.test(val)) {
+        val = val.replace(/^[0-9]+/, "");
+      }
+      setForm((p) => ({ ...p, email: val }));
+      return;
+    }
+
+    setForm((p) => ({ ...p, [name]: value }));
+  };
 
   const handleSave = async () => {
     setMessage("");
 
-    //  validations (like register)
     const fullName = (form.full_name || "").trim();
     const email = (form.email || "").trim().toLowerCase();
     const phone = (form.phone_number || "").trim();
@@ -245,14 +253,13 @@ export default function UserProfile() {
     if (!fullName) return setMessage("Full name is required");
     if (!email) return setMessage("Email is required");
 
-    // phone: only digits, must be 10
-    const digitsOnly = phone.replace(/\D/g, "");
-    if (digitsOnly.length !== 10)
+    if (phone.length !== 10)
       return setMessage("Phone number must be exactly 10 digits");
 
-    // simple email format check
-    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    if (!emailOk) return setMessage("Please enter a valid email address");
+    const emailRegex = /^[a-z][a-z0-9._]*@[a-z0-9.-]+\.[a-z]{2,}$/;
+    if (!emailRegex.test(email)) {
+      return setMessage("Please enter a valid email. (Note: Email cannot start with a number)");
+    }
 
     try {
       const payload = {

@@ -1,51 +1,55 @@
 import { Link, useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
+import { 
+  LayoutDashboard, 
+  PlusCircle, 
+  Package, 
+  LogOut,
+  Zap,
+  History
+} from "lucide-react";
 
 const navLinks = [
   {
     to: "/entrepreneur/dashboard",
     label: "Dashboard",
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-        <rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" />
-        <rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" />
-      </svg>
-    ),
+    icon: <LayoutDashboard size={20} />,
   },
   {
     to: "/entrepreneur/create-delivery",
     label: "New Delivery",
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-      </svg>
-    ),
+    icon: <PlusCircle size={20} />,
   },
   {
     to: "/entrepreneur/my-deliveries",
     label: "My Deliveries",
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 10V11" />
-      </svg>
-    ),
+    icon: <Package size={20} />,
+  },
+  {
+    to: "/entrepreneur/my-history",
+    label: "History",
+    icon: <History size={20} />,
   },
 ];
 
 const SidebarLink = ({ to, icon, label, active }) => (
   <Link
     to={to}
-    className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 group
+    className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all duration-200 group
       ${active
-        ? "bg-white text-[#1D4ED8] shadow-md shadow-black/10"
-        : "text-blue-100 hover:bg-white/10 hover:text-white"
+        ? "bg-blue-50 text-blue-600 shadow-sm"
+        : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
       }`}
   >
-    <span className={`transition-colors ${active ? "text-[#1D4ED8]" : "text-blue-200 group-hover:text-white"}`}>
+    <span className={`transition-colors ${active ? "text-blue-600" : "text-slate-400 group-hover:text-slate-600"}`}>
       {icon}
     </span>
     {label}
     {active && (
-      <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[#06B6D4]" />
+      <motion.span 
+        layoutId="activeIndicator"
+        className="ml-auto w-1.5 h-1.5 rounded-full bg-blue-600" 
+      />
     )}
   </Link>
 );
@@ -55,25 +59,28 @@ const EntrepreneurSidebar = () => {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <div className="fixed left-0 top-0 w-[240px] h-screen bg-[#1D4ED8] flex flex-col z-30 shadow-2xl shadow-[#1D4ED8]/40">
-
+    <motion.div 
+      initial={{ x: -280 }}
+      animate={{ x: 0 }}
+      className="fixed left-0 top-0 w-[260px] h-screen bg-white flex flex-col z-30 border-r border-slate-100"
+    >
       {/* Logo */}
-      <div className="px-6 py-6 border-b border-white/10">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-[#06B6D4] flex items-center justify-center shadow-md">
-            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
+      <div className="px-8 py-8">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-slate-900 flex items-center justify-center shadow-lg shadow-slate-200">
+            <Zap size={20} className="text-white fill-white" />
           </div>
-          <span className="text-white text-xl font-extrabold tracking-tight">RouteX</span>
+          <div className="leading-none">
+            <span className="text-slate-900 text-xl font-black tracking-tighter block">RouteX</span>
+            <span className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-0.5 block">Entrepreneur</span>
+          </div>
         </div>
-        <p className="text-blue-200 text-[11px] font-medium mt-1.5 ml-0.5">Entrepreneur Portal</p>
       </div>
 
       {/* Nav Links */}
-      <nav className="flex-1 px-3 py-5 space-y-1 overflow-y-auto">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-blue-300/60 px-4 mb-3">
-          Navigation
+      <nav className="flex-1 px-4 py-4 space-y-1.5 overflow-y-auto">
+        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-300 px-4 mb-4">
+          Main Menu
         </p>
         {navLinks.map((link) => (
           <SidebarLink
@@ -87,30 +94,28 @@ const EntrepreneurSidebar = () => {
       </nav>
 
       {/* User / Logout */}
-      <div className="px-3 py-5 border-t border-white/10 space-y-3">
+      <div className="px-4 py-6 border-t border-slate-50 space-y-3">
         {/* User pill */}
-        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/10">
-          <div className="w-8 h-8 rounded-full bg-[#06B6D4]/30 border border-[#06B6D4]/50 flex items-center justify-center text-sm font-bold text-white shrink-0">
+        <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-slate-50 border border-slate-100">
+          <div className="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-sm font-black text-slate-700 shadow-sm shrink-0">
             E
           </div>
           <div className="min-w-0">
-            <p className="text-white text-xs font-bold truncate">Entrepreneur</p>
-            <p className="text-blue-200 text-[10px] truncate">Active account</p>
+            <p className="text-slate-900 text-xs font-black truncate">Entrepreneur</p>
+            <p className="text-slate-400 text-[10px] font-bold truncate">Premium Partner</p>
           </div>
         </div>
 
         {/* Logout */}
         <button
           onClick={() => { localStorage.clear(); window.location.href = "/login"; }}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-red-500 text-blue-100 hover:text-white text-sm font-bold rounded-xl transition-all duration-200 group"
+          className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white hover:bg-red-50 text-slate-500 hover:text-red-600 text-xs font-black rounded-2xl transition-all duration-200 border border-transparent hover:border-red-100 group"
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
-          </svg>
-          Logout
+          <LogOut size={16} className="transition-transform group-hover:translate-x-0.5" />
+          LOGOUT SESSION
         </button>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

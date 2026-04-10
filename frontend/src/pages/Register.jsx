@@ -41,6 +41,16 @@ export default function Register() {
     return;
   }
 
+  // EMAIL (no leading numbers, specific characters)
+  if (name === "email") {
+    let val = value.toLowerCase().replace(/[^a-z0-9@.]/g, "");
+    if (val.length > 0 && /^[0-9]/.test(val)) {
+      val = val.replace(/^[0-9]+/, "");
+    }
+    setForm((p) => ({ ...p, email: val }));
+    return;
+  }
+
   // LICENSE NUMBER (letters + numbers only)
   if (name === "license_number") {
     const cleanLicense = value.replace(/[^a-zA-Z0-9]/g, "");
@@ -105,7 +115,12 @@ export default function Register() {
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
       window.dispatchEvent(new Event("storage"));
-      navigate("/");
+
+      const role = data?.user?.role;
+      if (role === "admin") navigate("/admin");
+      else if (role === "driver") navigate("/driver/dashboard");
+      else if (role === "entrepreneur") navigate("/entrepreneur/dashboard");
+      else navigate("/");
     } catch {
       setError("Google authentication failed");
     }

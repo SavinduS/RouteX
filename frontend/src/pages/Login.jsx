@@ -12,6 +12,7 @@ export default function Login() {
 
     if (normalizedRole === "admin") return "/admin";
     if (normalizedRole === "driver") return "/driver/dashboard";
+    if (normalizedRole === "entrepreneur") return "/";
     return "/";
   };
 

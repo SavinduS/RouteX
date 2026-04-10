@@ -109,7 +109,38 @@ const CreateDelivery = () => {
     package_size:     'small',
   });
 
-  const handleInputChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    
+    // --- Input Masking & Prevention ---
+    if (name === "receiver_phone") {
+      // Allow only numbers and limit to 10
+      const val = value.replace(/[^0-9]/g, "").slice(0, 10);
+      setFormData({ ...formData, [name]: val });
+      return;
+    }
+
+    if (name === "receiver_email") {
+      // Rule: Simple letters, numbers, @ and . only.
+      // Special Rule: Cant type numbers front of email (first char)
+      let val = value.toLowerCase().replace(/[^a-z0-9@.]/g, "");
+      
+      if (val.length > 0 && /^[0-9]/.test(val)) {
+        val = val.replace(/^[0-9]+/, "");
+      }
+      
+      setFormData({ ...formData, [name]: val });
+      return;
+    }
+
+    if (name === "receiver_name") {
+      const val = value.replace(/[^a-zA-Z\s]/g, "");
+      setFormData({ ...formData, [name]: val });
+      return;
+    }
+
+    setFormData({ ...formData, [name]: value });
+  };
 
   const handleMapSelect = (type, lat, lng, address) =>
     setFormData(prev => ({
@@ -131,6 +162,20 @@ const CreateDelivery = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(null);
+
+    // --- Strict Final Validation ---
+    if (formData.receiver_phone.length !== 10) {
+      setError("Phone number must be exactly 10 digits.");
+      return;
+    }
+
+    const emailRegex = /^[a-z][a-z0-9._]*@[a-z0-9.-]+\.[a-z]{2,}$/;
+    if (!emailRegex.test(formData.receiver_email)) {
+      setError("Please enter a valid email. (Note: Email cannot start with a number)");
+      return;
+    }
+
     if (!formData.pickup_address || !formData.dropoff_address) {
       setError('Please select both Pickup and Dropoff locations on the map.');
       return;

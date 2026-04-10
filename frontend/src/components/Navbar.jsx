@@ -179,6 +179,19 @@ export default function Navbar() {
             </>
           ) : (
             <div className="flex items-center gap-4">
+              <Link
+                to={
+                  user?.role === "admin"
+                    ? "/admin"
+                    : user?.role === "driver"
+                    ? "/driver/dashboard"
+                    : "/entrepreneur/dashboard"
+                }
+                className="rounded-2xl bg-[#1D4ED8] px-4 py-2 text-sm font-bold text-white transition hover:opacity-90 active:scale-95"
+              >
+                Dashboard
+              </Link>
+
               <div
                 onClick={() => navigate("/profile")}
                 className="flex cursor-pointer items-center gap-3 transition hover:opacity-80"
@@ -277,6 +290,22 @@ export default function Navbar() {
               </div>
             ) : (
               <div className="grid gap-2">
+                <button
+                  onClick={() => {
+                    setOpenMobile(false);
+                    navigate(
+                      user?.role === "admin"
+                        ? "/admin"
+                        : user?.role === "driver"
+                        ? "/driver/dashboard"
+                        : "/entrepreneur/dashboard"
+                    );
+                  }}
+                  className="w-full rounded-xl bg-[#1D4ED8] px-4 py-3 text-left text-sm font-bold text-white transition hover:opacity-90"
+                >
+                  Dashboard
+                </button>
+
                 <button
                   onClick={() => {
                     setOpenMobile(false);
