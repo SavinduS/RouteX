@@ -8,8 +8,12 @@ import {
   Filter,
   RefreshCcw,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  CheckCircle2,
+  AlertCircle,
+  Loader2
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 // Helper: Calculate distance between two lat/lng coordinates in kilometers (Haversine Formula)
 const calculateDistance = (lat1, lon1, lat2, lon2) => {
@@ -36,11 +40,18 @@ const AvailableOrders = () => {
   const [isOnline, setIsOnline] = useState(
     () => localStorage.getItem("driverOnline") === "true",
   );
-  const [showFilters, setShowFilters] = useState(false); // Mobile filter toggle
+  const [showFilters, setShowFilters] = useState(false);
+  const [loadingOrderId, setLoadingOrderId] = useState(null);
+  const [notification, setNotification] = useState(null);
 
   // Filter States
   const [searchCity, setSearchCity] = useState("");
-  const [maxDistance, setMaxDistance] = useState(""); // empty means 'Any distance'
+  const [maxDistance, setMaxDistance] = useState("");
+
+  const showToast = (message, type = "success") => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 3000);
+  };
 
   const fetchAvailableOrders = async () => {
     try {
@@ -48,6 +59,7 @@ const AvailableOrders = () => {
       setAvailableOrders(res.data.data);
     } catch (err) {
       console.error("Error fetching orders:", err);
+      showToast("Failed to load orders", "error");
     }
   };
 
@@ -68,20 +80,29 @@ const AvailableOrders = () => {
 
   const handleAcceptOrder = async (order) => {
     if (!DRIVER_ID) {
-      alert("Driver ID not found. Please re-login.");
+      showToast("Driver ID not found. Please re-login.", "error");
       return;
     }
+    
+    setLoadingOrderId(order._id);
     try {
       await api.post("/driver/orders/accept", {
         order_id: order._id,
         driver_id: DRIVER_ID,
       });
-      alert("Order accepted successfully!");
-      setAvailableOrders(availableOrders.filter((o) => o._id !== order._id));
-      navigate("/driver/dashboard");
+      
+      showToast("Order accepted successfully!");
+      setAvailableOrders(prev => prev.filter((o) => o._id !== order._id));
+      
+      // Delay navigation slightly to let user see success message
+      setTimeout(() => {
+        navigate("/driver/dashboard");
+      }, 1500);
     } catch (err) {
       console.error("Failed to accept order:", err);
-      alert(err.response?.data?.message || "Failed to accept order");
+      showToast(err.response?.data?.message || "Failed to accept order", "error");
+    } finally {
+      setLoadingOrderId(null);
     }
   };
 
@@ -298,9 +319,20 @@ const AvailableOrders = () => {
                       </div>
                       <button
                         onClick={() => handleAcceptOrder(order)}
-                        className="w-full sm:w-auto bg-slate-900 text-white px-8 py-3 rounded-xl font-black text-sm hover:bg-[#1D4ED8] transition-all shadow-lg active:scale-95 group-hover:scale-105"
+                        disabled={loadingOrderId !== null}
+                        className={`w-full sm:w-auto px-8 py-3 rounded-xl font-black text-sm transition-all shadow-lg active:scale-95 group-hover:scale-105 flex items-center justify-center gap-2
+                          ${loadingOrderId === order._id 
+                            ? "bg-slate-700 text-white cursor-not-allowed" 
+                            : "bg-slate-900 text-white hover:bg-[#1D4ED8]"
+                          }`}
                       >
-                        Accept Order
+                        {loadingOrderId === order._id ? (
+                          <>
+                            <Loader2 size={18} className="animate-spin" /> Accepting...
+                          </>
+                        ) : (
+                          "Accept Order"
+                        )}
                       </button>
                     </div>
                   </div>
@@ -310,6 +342,33 @@ const AvailableOrders = () => {
           </div>
         </div>
       )}
+
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {notification && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, x: "-50%" }}
+            animate={{ opacity: 1, y: 0, x: "-50%" }}
+            exit={{ opacity: 0, y: 20, x: "-50%" }}
+            className={`fixed bottom-8 left-1/2 z-[2000] flex items-center gap-3 px-6 py-4 rounded-2xl shadow-2xl border min-w-[320px] ${
+              notification.type === "success"
+                ? "bg-white border-green-100 text-slate-800"
+                : "bg-rose-50 border-rose-100 text-rose-900"
+            }`}
+          >
+            {notification.type === "success" ? (
+              <div className="bg-green-500 p-1.5 rounded-full">
+                <CheckCircle2 size={18} className="text-white" />
+              </div>
+            ) : (
+              <div className="bg-rose-500 p-1.5 rounded-full">
+                <AlertCircle size={18} className="text-white" />
+              </div>
+            )}
+            <p className="font-bold text-sm">{notification.message}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

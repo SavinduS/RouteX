@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Menu, X, Truck } from "lucide-react";
 
@@ -15,19 +15,74 @@ export default function Navbar() {
   const location = useLocation();
 
   const [openMobile, setOpenMobile] = useState(false);
+  const [user, setUser] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [activeSection, setActiveSection] = useState("top");
 
   const dropdownRef = useRef(null);
 
-  const user = useMemo(() => {
+  const syncAuthState = () => {
     try {
-      return JSON.parse(localStorage.getItem("user") || "null");
+      const storedUser = JSON.parse(localStorage.getItem("user") || "null");
+      const token = localStorage.getItem("token");
+
+      setUser(storedUser);
+      setIsLoggedIn(!!token);
     } catch {
-      return null;
+      setUser(null);
+      setIsLoggedIn(false);
     }
+  };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (location.pathname !== "/") return;
+
+      const sections = ["top", "about", "services", "contact"];
+      const scrollPosition = window.scrollY + 120; 
+
+      for (const section of sections) {
+        const element = document.getElementById(section);
+        if (element) {
+          const { offsetTop, offsetHeight } = element;
+          if (
+            scrollPosition >= offsetTop &&
+            scrollPosition < offsetTop + offsetHeight
+          ) {
+            setActiveSection(section);
+            break;
+          }
+        }
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
   }, [location.pathname]);
 
-  const isLoggedIn = !!localStorage.getItem("token");
+  useEffect(() => {
+    if (location.pathname !== "/") return;
+
+    const currentHash = location.hash.replace("#", "");
+    setActiveSection(currentHash || "top");
+  }, [location.pathname, location.hash]);
+
+  useEffect(() => {
+    syncAuthState();
+
+    const handleStorageChange = () => {
+      syncAuthState();
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    window.addEventListener("authChanged", handleStorageChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("authChanged", handleStorageChange);
+    };
+  }, []);
 
   useEffect(() => {
     const handler = (e) => {
@@ -55,46 +110,17 @@ export default function Navbar() {
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    window.dispatchEvent(new Event("storage"));
+    window.dispatchEvent(new Event("authChanged"));
     setOpenMobile(false);
     navigate("/");
   };
 
-  const linkBase = "px-4 py-2 rounded-[16px] text-[14px] font-bold transition-all duration-200";
 
-  const linkInactive = "text-slate-700 hover:text-[#1D4ED8] hover:bg-slate-50";
-
+  const linkBase =
+    "px-4 py-2 rounded-[16px] text-[14px] font-bold transition-all duration-200 cursor-pointer";
+  const linkInactive =
+    "text-slate-700 hover:text-[#1D4ED8] hover:bg-slate-100";
   const linkActive = "text-[#1D4ED8] bg-[#DBEAFE] shadow-sm";
-
-  useEffect(() => {
-    const sections = ["top", "about", "services", "contact"];
-
-    const handleScroll = () => {
-      if (location.pathname !== "/") return;
-
-      const scrollPosition = window.scrollY + 120;
-
-      for (let i = sections.length - 1; i >= 0; i--) {
-        const section = document.getElementById(sections[i]);
-        if (section && section.offsetTop <= scrollPosition) {
-          setActiveSection(sections[i]);
-          break;
-        }
-      }
-    };
-
-    if (location.pathname === "/") {
-      const hash = location.hash?.replace("#", "");
-      if (hash && sections.includes(hash)) {
-        setActiveSection(hash);
-      } else {
-        handleScroll();
-      }
-    }
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [location.pathname, location.hash]);
 
   const handleBrandClick = (e) => {
     e.preventDefault();
@@ -103,32 +129,60 @@ export default function Navbar() {
     if (location.pathname === "/") {
       window.scrollTo({ top: 0, behavior: "smooth" });
       setActiveSection("top");
-      navigate("/#top", { replace: true });
+      window.history.replaceState(null, "", "/");
     } else {
-      navigate("/#top");
+      navigate("/");
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        window.history.replaceState(null, "", "/");
+      }, 120);
     }
   };
 
-  const sectionLinkClass = (section) => {
-  const isHomeRoute = location.pathname === "/";
-  const isProfileLikeRoute = location.pathname !== "/";
+  const scrollToSection = (section) => {
+  const el = document.getElementById(section);
+  if (!el) return;
 
-  const isActive =
-    (isHomeRoute && activeSection === section) ||
-    (isProfileLikeRoute && section === "top");
+  const navbarOffset = 60;
+  const y = el.getBoundingClientRect().top + window.pageYOffset - navbarOffset;
 
-  return `${linkBase} ${isActive ? linkActive : linkInactive}`;
+  window.scrollTo({
+    top: y,
+    behavior: "smooth",
+  });
 };
 
+const handleNavClick = (section) => {
+  setActiveSection(section);
+  setOpenMobile(false);
+
+  if (location.pathname !== "/") {
+    navigate("/", { replace: false });
+
+    setTimeout(() => {
+      scrollToSection(section);
+    }, 120);
+    return;
+  }
+
+  scrollToSection(section);
+
+  // URL eke hash ekak nathi karanawa
+  window.history.replaceState(null, "", "/");
+};
+
+  const sectionLinkClass = (section) => {
+    const isActive = location.pathname === "/" && section === activeSection;
+    return `${linkBase} ${isActive ? linkActive : linkInactive}`;
+  };
+
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur-md">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-5 py-3">
-        {/* Brand */}
+    <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur-md">  <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-5 py-3">
         <Link
-            to="/#top"
-            onClick={handleBrandClick}
-            className="flex items-center gap-3 shrink-0"
-          >
+          to="/#top"
+          onClick={handleBrandClick}
+          className="flex items-center gap-3 shrink-0"
+        >
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#1D4ED8] shadow-sm">
             <Truck size={22} className="text-white" />
           </div>
@@ -143,23 +197,52 @@ export default function Navbar() {
           </div>
         </Link>
 
-        {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-1 rounded-[20px] border border-slate-200 bg-white p-1 shadow-sm">
-          <Link to="/#top" className={sectionLinkClass("top")}>
+          <Link
+            to="/"
+            onClick={(e) => {
+              e.preventDefault();
+              handleNavClick("top");
+            }}
+            className={sectionLinkClass("top")}
+          >
             Home
           </Link>
-          <Link to="/#about" className={sectionLinkClass("about")}>
+
+          <Link
+            to="/"
+            onClick={(e) => {
+              e.preventDefault();
+              handleNavClick("about");
+            }}
+            className={sectionLinkClass("about")}
+          >
             About
           </Link>
-          <Link to="/#services" className={sectionLinkClass("services")}>
+
+          <Link
+            to="/"
+            onClick={(e) => {
+              e.preventDefault();
+              handleNavClick("services");
+            }}
+            className={sectionLinkClass("services")}
+          >
             Services
           </Link>
-          <Link to="/#contact" className={sectionLinkClass("contact")}>
+
+          <Link
+            to="/"
+            onClick={(e) => {
+              e.preventDefault();
+              handleNavClick("contact");
+            }}
+            className={sectionLinkClass("contact")}
+          >
             Contact
           </Link>
         </nav>
 
-        {/* Right actions */}
         <div className="hidden md:flex items-center gap-3 shrink-0">
           {!isLoggedIn ? (
             <>
@@ -220,7 +303,6 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* Mobile menu button */}
         <button
           className="rounded-xl border border-slate-200 p-2 transition hover:bg-slate-100 md:hidden"
           onClick={() => setOpenMobile((s) => !s)}
@@ -230,14 +312,16 @@ export default function Navbar() {
         </button>
       </div>
 
-      {/* Mobile dropdown */}
       {openMobile && (
         <div className="border-t border-slate-200 bg-white md:hidden">
           <div className="mx-auto max-w-7xl space-y-3 px-5 py-4">
             <div className="grid gap-2">
               <Link
-                to="/#top"
-                onClick={() => setOpenMobile(false)}
+                to="/"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleNavClick("top");
+                }}
                 className={`block ${sectionLinkClass("top")}`}
               >
                 Home
@@ -245,7 +329,10 @@ export default function Navbar() {
 
               <Link
                 to="/#about"
-                onClick={() => setOpenMobile(false)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleNavClick("about");
+                }}
                 className={`block ${sectionLinkClass("about")}`}
               >
                 About
@@ -253,7 +340,10 @@ export default function Navbar() {
 
               <Link
                 to="/#services"
-                onClick={() => setOpenMobile(false)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleNavClick("services");
+                }}
                 className={`block ${sectionLinkClass("services")}`}
               >
                 Services
@@ -261,7 +351,10 @@ export default function Navbar() {
 
               <Link
                 to="/#contact"
-                onClick={() => setOpenMobile(false)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleNavClick("contact");
+                }}
                 className={`block ${sectionLinkClass("contact")}`}
               >
                 Contact

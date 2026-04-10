@@ -1,0 +1,14 @@
+config:
+  target: "http://localhost:5000" # Your Backend Server URL
+  phases:
+    - duration: 30
+      arrivalRate: 5
+      name: "Sustained Login Load"
+scenarios:
+  - name: "User Login Performance Flow"
+    flow:
+      - post:
+          url: "/api/auth/login"
+          json:
+            email: "testuser@example.com"
+            password: "password123"

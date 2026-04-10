@@ -331,10 +331,11 @@ export default function Register() {
           </button>
 
           {/* more space between Register & Google */}
-          <div className="mt-5">
+          <div className="mt-5 w-full">
             <GoogleSignInButton
               fullWidth
               heightClass="h-12"
+              className="w-full"
               onSuccess={handleGoogleSuccess}
               onError={(msg) => setError(msg)}
             />

@@ -214,6 +214,9 @@ export default function UserProfile() {
   }, []);
 
   const isDriver = user?.role === "driver";
+  const isAdmin = user?.role === "admin";
+  const shouldHideNavbar = isAdmin || isDriver;
+
   const memberSince = useMemo(() => formatDate(user?.createdAt), [user?.createdAt]);
 
   const handleChange = (e) => {
@@ -232,11 +235,15 @@ export default function UserProfile() {
     }
 
     if (name === "email") {
-      let val = value.toLowerCase().replace(/[^a-z0-9@.]/g, "");
-      if (val.length > 0 && /^[0-9]/.test(val)) {
-        val = val.replace(/^[0-9]+/, "");
+      // Allow only alphanumeric, @ and .
+      // Also prevent multiple @ symbols
+      let cleanEmail = value.replace(/[^a-zA-Z0-9@.]/g, "");
+      const atCount = (cleanEmail.match(/@/g) || []).length;
+      if (atCount > 1) {
+        const parts = cleanEmail.split("@");
+        cleanEmail = parts[0] + "@" + parts.slice(1).join("").replace(/@/g, "");
       }
-      setForm((p) => ({ ...p, email: val }));
+      setForm((p) => ({ ...p, email: cleanEmail }));
       return;
     }
 
@@ -256,10 +263,9 @@ export default function UserProfile() {
     if (phone.length !== 10)
       return setMessage("Phone number must be exactly 10 digits");
 
-    const emailRegex = /^[a-z][a-z0-9._]*@[a-z0-9.-]+\.[a-z]{2,}$/;
-    if (!emailRegex.test(email)) {
-      return setMessage("Please enter a valid email. (Note: Email cannot start with a number)");
-    }
+    // stricter email format check
+    const emailOk = /^[a-zA-Z0-9.]+@[a-zA-Z0-9.]+\.[a-zA-Z]{2,}$/.test(email);
+    if (!emailOk) return setMessage("Please enter a valid email address");
 
     try {
       const payload = {
@@ -354,8 +360,6 @@ export default function UserProfile() {
 };
 
   if (!user) return null;
-  
-  const isAdmin = user?.role === "admin";
 
   const tabs = [
   { id: "info", label: "Personal Info" },
@@ -368,7 +372,7 @@ export default function UserProfile() {
 
   return (
     <div className="min-h-screen bg-[#F1F5F9]" style={{ fontFamily: "'DM Sans', sans-serif" }}>
-      {!isAdmin && <Navbar />}
+      {!shouldHideNavbar && <Navbar />}
 
       {isAdmin && (
         <div className="max-w-5xl mx-auto px-4 sm:px-5 pt-6 sm:pt-8">
