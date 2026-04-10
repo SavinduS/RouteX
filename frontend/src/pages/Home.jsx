@@ -96,6 +96,15 @@ function useReveal(threshold = 0.18) {
 /*  HERO */
 function Hero() {
   const r1 = useReveal(), r2 = useReveal(), r3 = useReveal(), r4 = useReveal();
+import {
+  Package,
+  MapPinned,
+  Truck,
+  ShieldCheck,
+  Phone,
+  Mail,
+  MapPin,
+} from "lucide-react";
 
   return (
     <section
@@ -164,6 +173,295 @@ function MarqueeBand() {
           </div>
         ))}
       </div>
+    <div
+      className="min-h-screen bg-[#F1F5F9] text-slate-800"
+      style={{ fontFamily: "'DM Sans', sans-serif" }}
+    >
+      <Navbar />
+
+      {/* Hero Section */}
+      <section id="top" className="relative overflow-hidden bg-gradient-to-br from-[#E0F2FE] via-white to-[#F1F5F9]">
+        <div className="max-w-7xl mx-auto px-5 pt-8 pb-14 md:pt-10 md:pb-16 grid md:grid-cols-2 gap-12 items-center">
+          <div>
+            <span className="inline-block px-4 py-2 rounded-full bg-[#DBEAFE] text-[#1D4ED8] text-sm font-bold">
+              Smart Delivery Platform
+            </span>
+
+            <h1 className="mt-6 text-4xl md:text-6xl font-extrabold leading-tight text-slate-900">
+              Fast, Reliable, and Smart Logistics with{" "}
+              <span className="text-[#1D4ED8]">RouteX</span>
+            </h1>
+
+            <p className="mt-5 text-lg text-slate-600 max-w-xl leading-relaxed">
+              Manage deliveries, track live orders, connect with drivers, and
+              simplify logistics operations from one modern platform.
+            </p>
+
+            <div className="mt-8 flex flex-wrap gap-4">
+              <Link
+                to="/track"
+                className="px-6 py-3 rounded-xl bg-[#1D4ED8] text-white font-semibold hover:bg-[#1E40AF] transition shadow-md"
+              >
+                Track Order
+              </Link>
+
+              <a
+                href="#services"
+                className="px-6 py-3 rounded-xl border border-slate-300 text-slate-700 font-semibold hover:bg-slate-100 transition"
+              >
+                View Services
+              </a>
+            </div>
+
+            <div className="mt-10 grid grid-cols-2 sm:grid-cols-3 gap-4">
+              <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+                <h3 className="text-2xl font-extrabold text-[#1D4ED8]">500+</h3>
+                <p className="text-sm text-slate-500 mt-1">Active Deliveries</p>
+              </div>
+              <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+                <h3 className="text-2xl font-extrabold text-[#1D4ED8]">120+</h3>
+                <p className="text-sm text-slate-500 mt-1">Verified Drivers</p>
+              </div>
+              <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 col-span-2 sm:col-span-1">
+                <h3 className="text-2xl font-extrabold text-[#1D4ED8]">24/7</h3>
+                <p className="text-sm text-slate-500 mt-1">Tracking Support</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="relative">
+            <div className="bg-white rounded-[28px] shadow-xl border border-slate-200 p-6 md:p-8">
+              <div className="grid gap-4">
+                <div className="rounded-2xl bg-[#EFF6FF] p-5 border border-blue-100">
+                  <p className="text-sm font-semibold text-slate-500">
+                    Live Delivery Status
+                  </p>
+                  <h3 className="mt-2 text-2xl font-extrabold text-slate-900">
+                    In Transit
+                  </h3>
+                  <p className="mt-2 text-sm text-slate-600">
+                    Your shipment is moving with real-time updates and secure tracking.
+                  </p>
+                </div>
+
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="rounded-2xl bg-slate-50 p-5 border border-slate-200">
+                    <p className="text-sm text-slate-500">Pickup</p>
+                    <p className="mt-2 font-bold text-slate-800">Colombo</p>
+                  </div>
+                  <div className="rounded-2xl bg-slate-50 p-5 border border-slate-200">
+                    <p className="text-sm text-slate-500">Destination</p>
+                    <p className="mt-2 font-bold text-slate-800">Kandy</p>
+                  </div>
+                </div>
+
+                <div className="rounded-2xl bg-[#1D4ED8] p-5 text-white">
+                  <p className="text-sm text-blue-100">Courier Assigned</p>
+                  <h4 className="mt-1 text-xl font-bold">Driver Ready for Delivery</h4>
+                  <p className="mt-2 text-sm text-blue-100">
+                    Smart assignment and route visibility keep your order moving efficiently.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* About Section */}
+      <section id="about" className="py-20">
+        <div className="max-w-7xl mx-auto px-5 grid md:grid-cols-2 gap-12 items-center">
+          <div>
+            <span className="text-sm font-bold uppercase tracking-widest text-[#1D4ED8]">
+              About RouteX
+            </span>
+            <h2 className="mt-3 text-3xl md:text-4xl font-extrabold text-slate-900">
+              A smarter way to manage rural and urban deliveries
+            </h2>
+            <p className="mt-5 text-slate-600 leading-relaxed">
+              RouteX is a smart logistics and last-mile delivery platform built
+              to connect businesses, drivers, and customers through one reliable
+              system. It helps manage orders, monitor deliveries in real time,
+              and improve the full transportation workflow.
+            </p>
+            <p className="mt-4 text-slate-600 leading-relaxed">
+              The platform is designed to reduce manual coordination, improve
+              delivery efficiency, and create a better experience for both
+              senders and delivery agents.
+            </p>
+          </div>
+
+          <div className="grid gap-4">
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+              <h3 className="text-lg font-bold text-slate-900">Our Mission</h3>
+              <p className="mt-2 text-slate-600">
+                To simplify delivery management with real-time technology,
+                trusted tracking, and efficient logistics support.
+              </p>
+            </div>
+
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+              <h3 className="text-lg font-bold text-slate-900">Our Vision</h3>
+              <p className="mt-2 text-slate-600">
+                To become a dependable digital delivery platform that supports
+                businesses across Sri Lanka with smart transportation solutions.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Services Section */}
+      <section id="services" className="py-20 bg-white border-y border-slate-200">
+        <div className="max-w-7xl mx-auto px-5">
+          <div className="text-center max-w-2xl mx-auto">
+            <span className="text-sm font-bold uppercase tracking-widest text-[#1D4ED8]">
+              Our Services
+            </span>
+            <h2 className="mt-3 text-3xl md:text-4xl font-extrabold text-slate-900">
+              Everything you need for delivery management
+            </h2>
+            <p className="mt-4 text-slate-600">
+              RouteX provides powerful features to manage orders, track delivery
+              progress, and improve logistics operations with ease.
+            </p>
+          </div>
+
+          <div className="mt-14 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="bg-[#F8FAFC] p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition">
+              <Package className="text-[#1D4ED8]" size={28} />
+              <h3 className="mt-4 text-lg font-bold text-slate-900">
+                Order Management
+              </h3>
+              <p className="mt-2 text-sm text-slate-600 leading-relaxed">
+                Create, update, and organize delivery requests from one dashboard.
+              </p>
+            </div>
+
+            <div className="bg-[#F8FAFC] p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition">
+              <MapPinned className="text-[#1D4ED8]" size={28} />
+              <h3 className="mt-4 text-lg font-bold text-slate-900">
+                Live Tracking
+              </h3>
+              <p className="mt-2 text-sm text-slate-600 leading-relaxed">
+                Monitor delivery progress with real-time location visibility.
+              </p>
+            </div>
+
+            <div className="bg-[#F8FAFC] p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition">
+              <Truck className="text-[#1D4ED8]" size={28} />
+              <h3 className="mt-4 text-lg font-bold text-slate-900">
+                Smart Driver Assignment
+              </h3>
+              <p className="mt-2 text-sm text-slate-600 leading-relaxed">
+                Assign drivers efficiently based on delivery needs and availability.
+              </p>
+            </div>
+
+            <div className="bg-[#F8FAFC] p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition">
+              <ShieldCheck className="text-[#1D4ED8]" size={28} />
+              <h3 className="mt-4 text-lg font-bold text-slate-900">
+                Secure Verification
+              </h3>
+              <p className="mt-2 text-sm text-slate-600 leading-relaxed">
+                Improve delivery trust with verification and safer completion flow.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Contact Section */}
+      <section id="contact" className="py-20">
+        <div className="max-w-7xl mx-auto px-5">
+          <div className="text-center max-w-2xl mx-auto">
+            <span className="text-sm font-bold uppercase tracking-widest text-[#1D4ED8]">
+              Contact Us
+            </span>
+            <h2 className="mt-3 text-3xl md:text-4xl font-extrabold text-slate-900">
+              Let’s get in touch
+            </h2>
+            <p className="mt-4 text-slate-600">
+              Have questions about tracking, logistics, or delivery services?
+              Reach out to the RouteX team.
+            </p>
+          </div>
+
+          <div className="mt-14 grid md:grid-cols-2 gap-8">
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 space-y-6">
+              <div className="flex items-start gap-4">
+                <MapPin className="text-[#1D4ED8] mt-1" size={22} />
+                <div>
+                  <h3 className="font-bold text-slate-900">Address</h3>
+                  <p className="text-slate-600">Kandy Road, Colombo, Sri Lanka</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-4">
+                <Phone className="text-[#1D4ED8] mt-1" size={22} />
+                <div>
+                  <h3 className="font-bold text-slate-900">Phone</h3>
+                  <p className="text-slate-600">+94 91 227 6246</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-4">
+                <Mail className="text-[#1D4ED8] mt-1" size={22} />
+                <div>
+                  <h3 className="font-bold text-slate-900">Email</h3>
+                  <p className="text-slate-600">support@routex.com</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8">
+              <form className="space-y-5">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Enter your name"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-300 outline-none focus:ring-2 focus:ring-[#1D4ED8]/30"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    placeholder="Enter your email"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-300 outline-none focus:ring-2 focus:ring-[#1D4ED8]/30"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Message
+                  </label>
+                  <textarea
+                    rows="5"
+                    placeholder="Write your message..."
+                    className="w-full px-4 py-3 rounded-xl border border-slate-300 outline-none focus:ring-2 focus:ring-[#1D4ED8]/30"
+                  ></textarea>
+                </div>
+
+                <button
+                  type="submit"
+                  className="px-6 py-3 rounded-xl bg-[#1D4ED8] text-white font-semibold hover:bg-[#1E40AF] transition"
+                >
+                  Send Message
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <Footer />
     </div>
   );
 }
