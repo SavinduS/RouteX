@@ -100,28 +100,28 @@ function Hero() {
   return (
     <section
       id="top"
-      className="relative flex min-h-[92vh] items-center overflow-hidden bg-center bg-no-repeat bg-cover"
+      className="relative flex min-h-[95vh] lg:min-h-[92vh] items-center overflow-hidden bg-center bg-no-repeat bg-cover"
       style={{
         scrollMarginTop: "100px",
-        backgroundImage: 'linear-gradient(to right, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.8) 40%, rgba(15, 23, 42, 0.4) 100%), linear-gradient(to bottom, rgba(15, 23, 42, 0.4) 0%, rgba(15, 23, 42, 0.7) 100%), url("/delivery.jpg")',
+        backgroundImage: 'linear-gradient(to right, rgba(15, 23, 42, 0.98) 0%, rgba(15, 23, 42, 0.85) 50%, rgba(15, 23, 42, 0.4) 100%), linear-gradient(to bottom, rgba(15, 23, 42, 0.3) 0%, rgba(15, 23, 42, 0.8) 100%), url("/delivery.jpg")',
       }}
     >
-      <div className="relative z-[1] mx-auto w-full max-w-[1200px] px-6 pb-20 pt-[100px]">
-        <div className="max-w-[680px]">
+      <div className="relative z-[1] mx-auto w-full max-w-[1200px] px-6 pb-24 pt-[120px] lg:pt-[100px]">
+        <div className="max-w-[720px]">
           <div
             ref={r1}
-            className="rx3-reveal mb-[42px] inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 shadow-[0_4px_12px_rgba(0,0,0,0.1)] backdrop-blur-md"
+            className="rx3-reveal mb-[32px] lg:mb-[42px] inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 shadow-xl backdrop-blur-md"
           >
             <div className="rx3-pulse h-2 w-2 rounded-full bg-[#06B6D4]" />
-            <span className="font-mono text-[11px] font-medium tracking-[0.1em] text-[#94A3B8]">
+            <span className="font-mono text-[10px] lg:text-[11px] font-black uppercase tracking-[0.2em] text-[#94A3B8]">
               Smart Logistics Across Sri Lanka
             </span>
           </div>
 
           <h1
             ref={r2}
-            className="rx3-reveal delay-1 mb-12 font-['Poppins'] text-[clamp(2.5rem,6vw,4.5rem)] font-extrabold leading-[1.1] tracking-[-0.02em] text-white"
-            style={{ textShadow: "0 2px 10px rgba(0,0,0,0.3)" }}
+            className="rx3-reveal delay-1 mb-8 lg:mb-12 font-['Poppins'] text-[clamp(2.2rem,8vw,4.8rem)] font-black leading-[1.05] tracking-[-0.03em] text-white"
+            style={{ textShadow: "0 4px 20px rgba(0,0,0,0.4)" }}
           >
             Last Mile Delivery, <br />
             <span className="text-[#06B6D4]">Reimagined.</span>
@@ -129,20 +129,29 @@ function Hero() {
 
           <p
             ref={r3}
-            className="rx3-reveal delay-2 mb-[34px] max-w-[600px] font-['Poppins'] text-[clamp(16px,1.2vw,18px)] leading-[1.7] text-slate-300"
+            className="rx3-reveal delay-2 mb-[40px] max-w-[600px] font-['Plus_Jakarta_Sans'] text-[16px] lg:text-[18px] leading-[1.8] text-slate-300 font-medium"
           >
             RouteX gives Sri Lankan businesses a smarter way to deliver with AI
             route planning, live package tracking, and a trusted driver network
             built for speed, visibility, and reliability.
           </p>
 
-          <div ref={r4} className="rx3-reveal delay-3 flex flex-wrap gap-[14px]">
+          <div ref={r4} className="rx3-reveal delay-3 flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
             <Link
               to="/entrepreneur/create-delivery"
-              className="inline-flex min-w-[180px] h-[50px] items-center justify-center gap-2 rounded-[16px] border border-white/10 bg-[#1D4ED8] px-6 py-[13px] font-['Poppins'] text-[12px] font-bold uppercase tracking-[0.1em] text-white shadow-[0_8px_18px_rgba(29,78,216,0.20)] transition-all duration-300 no-underline hover:bg-[#2563EB] hover:-translate-y-0.5 hover:shadow-[0_12px_24px_rgba(29,78,216,0.28)]"
+              className="inline-flex h-[56px] items-center justify-center gap-3 rounded-[20px] bg-[#1D4ED8] px-8 font-['Poppins'] text-[13px] font-black uppercase tracking-[0.1em] text-white shadow-[0_12px_24px_rgba(29,78,216,0.3)] transition-all duration-300 hover:bg-[#2563EB] hover:-translate-y-1 hover:shadow-[0_16px_32px_rgba(29,78,216,0.4)] active:scale-95"
             >
-              Place Order <ArrowRight size={16} />
+              Place Order <ArrowRight size={18} />
             </Link>
+            <button
+              onClick={() => {
+                const el = document.getElementById("services");
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="inline-flex h-[56px] items-center justify-center gap-3 rounded-[20px] border-2 border-white/20 bg-white/5 px-8 font-['Poppins'] text-[13px] font-black uppercase tracking-[0.1em] text-white backdrop-blur-md transition-all duration-300 hover:bg-white/10 hover:border-white/40 active:scale-95"
+            >
+              Explore Solutions
+            </button>
           </div>
         </div>
       </div>

@@ -204,14 +204,14 @@ const UpdateDelivery = () => {
       <div className="w-full lg:w-[480px] flex flex-col bg-white shadow-2xl z-20 overflow-hidden">
         
         {/* Header */}
-        <div className="relative bg-[#1D4ED8] px-8 py-7 shrink-0 overflow-hidden">
-          <div className="absolute -top-10 -right-10 w-40 h-40 bg-[#06B6D4]/20 rounded-full pointer-events-none" />
+        <div className="relative bg-white border-b border-slate-100 px-8 py-7 shrink-0 overflow-hidden">
+          <div className="absolute -top-10 -right-10 w-40 h-40 bg-blue-50 rounded-full pointer-events-none" />
           <div className="relative z-10">
-            <Link to={`/entrepreneur/track/${id}`} className="group inline-flex items-center gap-2 text-blue-100 hover:text-white font-bold text-[10px] uppercase tracking-widest mb-4 transition-colors">
+            <Link to={`/entrepreneur/track/${id}`} className="group inline-flex items-center gap-2 text-[#1D4ED8] hover:text-blue-800 font-black text-[10px] uppercase tracking-widest mb-4 transition-colors">
               <ArrowLeft size={14} className="transition-transform group-hover:-translate-x-1" /> Back to Tracking
             </Link>
-            <h2 className="text-2xl font-black text-white uppercase tracking-tighter">Edit Shipment</h2>
-            <p className="text-blue-100 text-sm mt-1">Adjust locations and details</p>
+            <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tighter italic">Edit Shipment</h2>
+            <p className="text-slate-400 text-[11px] font-bold uppercase tracking-widest mt-1">Adjust locations and details</p>
           </div>
         </div>
 
@@ -330,7 +330,7 @@ const UpdateDelivery = () => {
               <button 
                 type="submit" 
                 disabled={saving}
-                className="flex-1 flex items-center justify-center gap-2 bg-[#1D4ED8] text-white py-4 rounded-2xl font-black uppercase tracking-widest text-xs shadow-lg shadow-blue-100 hover:bg-blue-800 transition-all active:scale-95 disabled:opacity-50"
+                className="flex-1 flex items-center justify-center gap-2 bg-[#1D4ED8] text-white py-4 rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] shadow-xl shadow-blue-100 hover:bg-blue-800 transition-all active:scale-95 disabled:opacity-50"
               >
                 {saving ? "Saving..." : "Save Changes"}
               </button>
