@@ -198,207 +198,203 @@ const UpdateDelivery = () => {
   const inputCls = "w-full pl-12 pr-4 py-3.5 bg-[#F1F5F9] border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all";
 
   return (
-    <div className="flex flex-col lg:flex-row h-screen bg-[#F1F5F9] overflow-hidden">
+    <div className="min-h-screen bg-[#F1F5F9] p-4 md:p-8 lg:p-10 font-sans">
       
-      {/* ════════════════ SIDEBAR ════════════════ */}
-      <div className="w-full lg:w-[480px] flex flex-col bg-white shadow-2xl z-20 overflow-hidden">
-        
-        {/* Header */}
-        <div className="relative bg-white border-b border-slate-100 px-8 py-7 shrink-0 overflow-hidden">
-          <div className="absolute -top-10 -right-10 w-40 h-40 bg-blue-50 rounded-full pointer-events-none" />
-          <div className="relative z-10">
-            <Link to={`/entrepreneur/track/${id}`} className="group inline-flex items-center gap-2 text-[#1D4ED8] hover:text-blue-800 font-black text-[10px] uppercase tracking-widest mb-4 transition-colors">
-              <ArrowLeft size={14} className="transition-transform group-hover:-translate-x-1" /> Back to Tracking
-            </Link>
-            <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tighter italic">Edit Shipment</h2>
-            <p className="text-slate-400 text-[11px] font-bold uppercase tracking-widest mt-1">Adjust locations and details</p>
-          </div>
-        </div>
-
-        {/* Scrollable Form */}
-        <div className="flex-1 overflow-y-auto px-8 py-6">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {error && (
-              <div className="flex items-center gap-3 bg-red-50 text-red-600 p-4 rounded-2xl text-sm font-bold border border-red-100">
-                <AlertCircle size={18} /> {error}
-              </div>
-            )}
-
-            {/* Recipient Details */}
-            <div className="space-y-4">
-               <div className="flex items-center gap-2 pb-1.5 border-b border-slate-100">
-                  <User className="text-[#1D4ED8]" size={14} />
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Recipient Info</span>
-               </div>
-               
-               <div className="space-y-3">
-                 <div className="relative">
-                   <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                   <input 
-                     type="text" name="receiver_name" value={formData.receiver_name} 
-                     onChange={handleChange} placeholder="Recipient Name" required className={inputCls} />
-                 </div>
-                 <div className="relative">
-                   <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                   <input 
-                     type="text" name="receiver_phone" value={formData.receiver_phone} 
-                     onChange={handleChange} placeholder="Phone Number" required className={inputCls} />
-                 </div>
-                 <div className="relative">
-                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                   <input 
-                     type="email" name="receiver_email" value={formData.receiver_email} 
-                     onChange={handleChange} placeholder="Email Address" required className={inputCls} />
-                 </div>
-               </div>
-            </div>
-
-            {/* Route Selection */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 pb-1.5 border-b border-slate-100">
-                  <MapPin className="text-[#1D4ED8]" size={14} />
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Route Selection</span>
-              </div>
-
-              {/* Toggle Buttons */}
-              <div className="flex p-1 bg-[#F1F5F9] rounded-xl gap-1">
-                <button type="button" onClick={() => setSelectingMode('pickup')}
-                  className={`flex-1 py-2.5 rounded-lg text-xs font-black uppercase transition-all ${
-                    selectingMode === 'pickup'
-                      ? 'bg-[#1D4ED8] text-white shadow-md'
-                      : 'text-slate-500 hover:bg-slate-200'
-                  }`}>
-                  📍 Pickup
-                </button>
-                <button type="button" onClick={() => setSelectingMode('dropoff')}
-                  className={`flex-1 py-2.5 rounded-lg text-xs font-black uppercase transition-all ${
-                    selectingMode === 'dropoff'
-                      ? 'bg-[#06B6D4] text-white shadow-md'
-                      : 'text-slate-500 hover:bg-slate-200'
-                  }`}>
-                  🏁 Dropoff
-                </button>
-              </div>
-
-              {/* Address Preview Cards */}
-              <div className="space-y-2">
-                <div className={`p-3 rounded-xl border transition-all ${
-                  selectingMode === 'pickup' ? 'bg-blue-50 border-[#1D4ED8]/30 ring-2 ring-[#1D4ED8]/15' : 'bg-[#F1F5F9] border-slate-200'
-                }`}>
-                  <span className="text-[9px] font-black text-[#1D4ED8] uppercase tracking-wider">Pickup Address</span>
-                  <p className="text-xs text-slate-700 font-medium mt-0.5 truncate">{formData.pickup_address}</p>
-                </div>
-                <div className={`p-3 rounded-xl border transition-all ${
-                  selectingMode === 'dropoff' ? 'bg-cyan-50 border-[#06B6D4]/30 ring-2 ring-[#06B6D4]/15' : 'bg-[#F1F5F9] border-slate-200'
-                }`}>
-                  <span className="text-[9px] font-black text-[#06B6D4] uppercase tracking-wider">Dropoff Address</span>
-                  <p className="text-xs text-slate-700 font-medium mt-0.5 truncate">{formData.dropoff_address}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Package & Vehicle */}
-            <div className="space-y-4">
-               <div className="flex items-center gap-2 pb-1.5 border-b border-slate-100">
-                  <Box className="text-[#1D4ED8]" size={14} />
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Package & Vehicle</span>
-               </div>
-               
-               <div className="grid grid-cols-2 gap-3">
-                 <div className="space-y-1">
-                   <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Vehicle</label>
-                   <select name="vehicle_type" value={formData.vehicle_type} onChange={handleChange} className="w-full px-3 py-3 bg-[#F1F5F9] border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none">
-                     <option value="bike">🏍 Motorbike</option>
-                     <option value="tuktuk">🛺 Tuktuk</option>
-                     <option value="van">🚐 Van</option>
-                     <option value="truck">🚛 Truck</option>
-                   </select>
-                 </div>
-                 <div className="space-y-1">
-                   <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Size</label>
-                   <select name="package_size" value={formData.package_size} onChange={handleChange} className="w-full px-3 py-3 bg-[#F1F5F9] border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none">
-                     <option value="small">Small</option>
-                     <option value="medium">Medium</option>
-                     <option value="large">Large</option>
-                   </select>
-                 </div>
-               </div>
-            </div>
-
-            {/* Actions */}
-            <div className="pt-6 border-t border-slate-50 flex gap-3">
-              <button 
-                type="submit" 
-                disabled={saving}
-                className="flex-1 flex items-center justify-center gap-2 bg-[#1D4ED8] text-white py-4 rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] shadow-xl shadow-blue-100 hover:bg-blue-800 transition-all active:scale-95 disabled:opacity-50"
-              >
-                {saving ? "Saving..." : "Save Changes"}
-              </button>
-              <button 
-                type="button" 
-                onClick={() => navigate(-1)}
-                className="px-6 flex items-center justify-center bg-slate-100 text-slate-600 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-slate-200 transition-all"
-              >
-                <X size={18} />
-              </button>
-            </div>
-          </form>
+      {/* ── Header ── */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
+        <div className="relative">
+          <Link to={`/entrepreneur/track/${id}`} className="group inline-flex items-center gap-2 text-[#1D4ED8] hover:text-blue-800 font-black text-[10px] uppercase tracking-widest mb-4 transition-colors">
+            <ArrowLeft size={14} className="transition-transform group-hover:-translate-x-1" /> Back to Tracking
+          </Link>
+          <h2 className="text-2xl md:text-4xl font-black text-slate-900 tracking-tighter uppercase italic leading-tight">Edit Shipment</h2>
+          <p className="text-slate-400 text-[11px] md:text-xs font-bold uppercase tracking-widest mt-1">Adjust locations and details for order #{id.slice(-6).toUpperCase()}</p>
         </div>
       </div>
 
-      {/* ════════════════ MAP ════════════════ */}
-      <div className="flex-1 relative">
-        
-        {/* Floating Search */}
-        <div className="absolute top-6 left-6 right-6 lg:right-auto lg:w-[400px] z-[1000]">
-          <form onSubmit={handleSearch}
-            className="flex items-center bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-white/60 overflow-hidden">
-            <span className="pl-4 text-slate-400 shrink-0"><SearchIcon size={18} /></span>
-            <input
-              placeholder="Search area..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex-1 px-3 py-3 outline-none text-sm font-medium bg-transparent text-slate-800"
-            />
-            <button type="submit"
-              className="m-1.5 bg-[#1D4ED8] text-white px-5 py-2.5 rounded-xl text-xs font-bold">
-              Search
-            </button>
-          </form>
-        </div>
+      <div className="grid grid-cols-1 lg:grid-cols-[480px_1fr] gap-8">
 
-        {/* Active Mode Pill */}
-        <div className="absolute top-24 left-6 z-[1000]">
-          <div className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold shadow-lg backdrop-blur-sm border ${
-            selectingMode === 'pickup' ? 'bg-[#1D4ED8]/90 text-white border-[#1D4ED8]/50' : 'bg-[#06B6D4]/90 text-white border-[#06B6D4]/50'
-          }`}>
-            <span className="w-2 h-2 rounded-full bg-white animate-pulse shrink-0" />
-            {selectingMode === 'pickup' ? 'Setting PICKUP location' : 'Setting DROPOFF location'}
+        {/* ════════════════ FORM SIDEBAR ════════════════ */}
+        <div className="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 overflow-hidden flex flex-col h-fit">
+          
+          <div className="p-8">
+            <form onSubmit={handleSubmit} className="space-y-8">
+              {error && (
+                <div className="flex items-center gap-3 bg-red-50 text-red-600 p-4 rounded-2xl text-sm font-bold border border-red-100">
+                  <AlertCircle size={18} /> {error}
+                </div>
+              )}
+
+              {/* Recipient Details */}
+              <div className="space-y-4">
+                 <div className="flex items-center gap-2 pb-1.5 border-b border-slate-100">
+                    <User className="text-[#1D4ED8]" size={14} />
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Recipient Info</span>
+                 </div>
+                 
+                 <div className="space-y-4">
+                   <div className="relative">
+                     <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                     <input 
+                       type="text" name="receiver_name" value={formData.receiver_name} 
+                       onChange={handleChange} placeholder="Recipient Name" required className={inputCls} />
+                   </div>
+                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                     <div className="relative">
+                       <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                       <input 
+                         type="text" name="receiver_phone" value={formData.receiver_phone} 
+                         onChange={handleChange} placeholder="Phone Number" required className={inputCls} />
+                     </div>
+                     <div className="relative">
+                       <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                       <input 
+                         type="email" name="receiver_email" value={formData.receiver_email} 
+                         onChange={handleChange} placeholder="Email Address" required className={inputCls} />
+                     </div>
+                   </div>
+                 </div>
+              </div>
+
+              {/* Route Selection */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 pb-1.5 border-b border-slate-100">
+                    <MapPin className="text-[#1D4ED8]" size={14} />
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Route Selection</span>
+                </div>
+
+                <div className="flex p-1 bg-[#F1F5F9] rounded-xl gap-1">
+                  <button type="button" onClick={() => setSelectingMode('pickup')}
+                    className={`flex-1 py-3 rounded-lg text-xs font-black uppercase transition-all ${
+                      selectingMode === 'pickup' ? 'bg-[#1D4ED8] text-white shadow-md' : 'text-slate-500 hover:bg-slate-200'
+                    }`}>
+                    📍 Pickup
+                  </button>
+                  <button type="button" onClick={() => setSelectingMode('dropoff')}
+                    className={`flex-1 py-3 rounded-lg text-xs font-black uppercase transition-all ${
+                      selectingMode === 'dropoff' ? 'bg-[#06B6D4] text-white shadow-md' : 'text-slate-500 hover:bg-slate-200'
+                    }`}>
+                    🏁 Dropoff
+                  </button>
+                </div>
+
+                <div className="space-y-2">
+                  <div className={`p-4 rounded-xl border transition-all ${selectingMode === 'pickup' ? 'bg-blue-50 border-[#1D4ED8]/30 ring-2 ring-[#1D4ED8]/15' : 'bg-[#F1F5F9] border-slate-200'}`}>
+                    <span className="text-[9px] font-black text-[#1D4ED8] uppercase tracking-wider">Pickup Address</span>
+                    <p className="text-xs text-slate-700 font-bold mt-1 truncate">{formData.pickup_address}</p>
+                  </div>
+                  <div className={`p-4 rounded-xl border transition-all ${selectingMode === 'dropoff' ? 'bg-cyan-50 border-[#06B6D4]/30 ring-2 ring-[#06B6D4]/15' : 'bg-[#F1F5F9] border-slate-200'}`}>
+                    <span className="text-[9px] font-black text-[#06B6D4] uppercase tracking-wider">Dropoff Address</span>
+                    <p className="text-xs text-slate-700 font-bold mt-1 truncate">{formData.dropoff_address}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Package & Vehicle */}
+              <div className="space-y-4">
+                 <div className="flex items-center gap-2 pb-1.5 border-b border-slate-100">
+                    <Box className="text-[#1D4ED8]" size={14} />
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Package & Vehicle</span>
+                 </div>
+                 
+                 <div className="grid grid-cols-2 gap-4">
+                   <div className="space-y-1">
+                     <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Vehicle</label>
+                     <select name="vehicle_type" value={formData.vehicle_type} onChange={handleChange} className="w-full px-4 py-3.5 bg-[#F1F5F9] border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none">
+                       <option value="bike">🏍 Motorbike</option>
+                       <option value="tuktuk">🛺 Tuktuk</option>
+                       <option value="van">🚐 Van</option>
+                       <option value="truck">🚛 Truck</option>
+                     </select>
+                   </div>
+                   <div className="space-y-1">
+                     <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Size</label>
+                     <select name="package_size" value={formData.package_size} onChange={handleChange} className="w-full px-4 py-3.5 bg-[#F1F5F9] border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none">
+                       <option value="small">Small</option>
+                       <option value="medium">Medium</option>
+                       <option value="large">Large</option>
+                     </select>
+                   </div>
+                 </div>
+              </div>
+
+              {/* Actions */}
+              <div className="pt-6 border-t border-slate-50 flex gap-4">
+                <button 
+                  type="submit" 
+                  disabled={saving}
+                  className="flex-1 py-5 bg-[#1D4ED8] text-white rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] shadow-xl shadow-blue-100 hover:bg-blue-800 transition-all active:scale-95 disabled:opacity-50"
+                >
+                  {saving ? "Saving Changes…" : "Confirm Updates"}
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => navigate(-1)}
+                  className="px-8 flex items-center justify-center bg-slate-100 text-slate-600 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-slate-200 transition-all"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+            </form>
           </div>
         </div>
 
-        <MapContainer center={mapCenter} zoom={13} className="h-full w-full">
-          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-          <ChangeView center={mapCenter} />
-          <LocationPicker onSelect={handleMapSelect} selectingMode={selectingMode} />
-
-          <Marker position={[formData.pickup_lat, formData.pickup_lng]} icon={pickupIcon}>
-            <Popup><strong>Pickup:</strong> {formData.pickup_address}</Popup>
-          </Marker>
-          <Marker position={[formData.dropoff_lat, formData.dropoff_lng]} icon={dropoffIcon}>
-            <Popup><strong>Dropoff:</strong> {formData.dropoff_address}</Popup>
-          </Marker>
-        </MapContainer>
-
-        {/* Legend */}
-        <div className="absolute bottom-8 right-8 z-[1000] space-y-2">
-          <div className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-xl shadow-lg border border-slate-100 flex items-center gap-3">
-            <div className="w-2.5 h-2.5 rounded-full bg-[#1D4ED8]" />
-            <span className="text-[10px] font-bold text-slate-600 uppercase">Pickup</span>
+        {/* ════════════════ MAP SECTION ════════════════ */}
+        <div className="bg-white p-2 rounded-[3rem] shadow-xl border border-slate-100 relative overflow-hidden min-h-[500px] lg:min-h-0 h-full">
+          
+          {/* Floating Search */}
+          <div className="absolute top-8 left-8 right-8 lg:right-auto lg:w-[420px] z-[1000]">
+            <form onSubmit={handleSearch}
+              className="flex items-center bg-white/90 backdrop-blur-md rounded-2xl shadow-xl border border-white/60 overflow-hidden">
+              <span className="pl-4 text-slate-400 shrink-0"><SearchIcon size={18} /></span>
+              <input
+                placeholder="Search area..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="flex-1 px-3 py-3 outline-none text-sm font-medium bg-transparent text-slate-800 placeholder:text-slate-400"
+              />
+              <button type="submit"
+                className="m-1.5 bg-[#1D4ED8] hover:bg-blue-800 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition-colors">
+                Search
+              </button>
+            </form>
           </div>
-          <div className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-xl shadow-lg border border-slate-100 flex items-center gap-3">
-            <div className="w-2.5 h-2.5 rounded-full bg-[#06B6D4]" />
-            <span className="text-[10px] font-bold text-slate-600 uppercase">Dropoff</span>
+
+          {/* Mode Indicators */}
+          <div className="absolute top-28 left-8 z-[1000] flex flex-col gap-3">
+            <div className={`px-4 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg backdrop-blur-md border transition-all ${
+              selectingMode === 'pickup' ? 'bg-[#1D4ED8] text-white border-[#1D4ED8]/50' : 'bg-[#06B6D4] text-white border-[#06B6D4]/50'
+            }`}>
+              Mode: Setting {selectingMode}
+            </div>
+            <div className="bg-white/90 backdrop-blur-md px-4 py-2 rounded-2xl shadow-lg border border-white/50 flex flex-col gap-2">
+               <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full bg-emerald-500" />
+                  <span className="text-[10px] font-black text-slate-800 uppercase tracking-widest">Pickup Pin</span>
+               </div>
+               <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full bg-red-500" />
+                  <span className="text-[10px] font-black text-slate-800 uppercase tracking-widest">Dropoff Pin</span>
+               </div>
+            </div>
+          </div>
+
+          <MapContainer center={mapCenter} zoom={13} className="h-full w-full rounded-[2.8rem] overflow-hidden">
+            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+            <ChangeView center={mapCenter} />
+            <LocationPicker onSelect={handleMapSelect} selectingMode={selectingMode} />
+
+            <Marker position={[formData.pickup_lat, formData.pickup_lng]} icon={pickupIcon}>
+              <Popup><strong>Pickup:</strong> {formData.pickup_address}</Popup>
+            </Marker>
+            <Marker position={[formData.dropoff_lat, formData.dropoff_lng]} icon={dropoffIcon}>
+              <Popup><strong>Dropoff:</strong> {formData.dropoff_address}</Popup>
+            </Marker>
+          </MapContainer>
+
+          <div className="absolute bottom-8 left-8 z-[1000]">
+            <div className="bg-slate-900/90 backdrop-blur-md text-white px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-3">
+              <span className="text-[10px] font-black uppercase tracking-widest">Click map to move markers</span>
+            </div>
           </div>
         </div>
 
