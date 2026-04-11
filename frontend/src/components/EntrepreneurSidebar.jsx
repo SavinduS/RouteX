@@ -6,7 +6,8 @@ import {
   Package, 
   LogOut,
   Zap,
-  History
+  History,
+  Truck
 } from "lucide-react";
 
 const navLinks = [
@@ -32,9 +33,10 @@ const navLinks = [
   },
 ];
 
-const SidebarLink = ({ to, icon, label, active }) => (
+const SidebarLink = ({ to, icon, label, active, onClick }) => (
   <Link
     to={to}
+    onClick={onClick}
     className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all duration-200 group
       ${active
         ? "bg-blue-50 text-blue-600 shadow-sm"
@@ -54,7 +56,7 @@ const SidebarLink = ({ to, icon, label, active }) => (
   </Link>
 );
 
-const EntrepreneurSidebar = () => {
+const EntrepreneurSidebar = ({ onClose }) => {
   const location = useLocation();
   const isActive = (path) => location.pathname === path;
 
@@ -62,17 +64,22 @@ const EntrepreneurSidebar = () => {
     <motion.div 
       initial={{ x: -280 }}
       animate={{ x: 0 }}
-      className="fixed left-0 top-0 w-[260px] h-screen bg-white flex flex-col z-30 border-r border-slate-100"
+      className="w-[260px] h-screen bg-white flex flex-col border-r border-slate-100 shadow-xl lg:shadow-none"
     >
       {/* Logo */}
       <div className="px-8 py-8">
-        <Link to="/" className="flex items-center gap-3 no-underline group">
-          <div className="w-10 h-10 rounded-2xl bg-slate-900 flex items-center justify-center shadow-lg shadow-slate-200 transition-transform group-hover:scale-105 active:scale-95">
-            <Zap size={20} className="text-white fill-white" />
+        <Link to="/" onClick={onClose} className="flex items-center gap-3 no-underline group">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#1D4ED8] shadow-sm transition-transform group-hover:scale-105 active:scale-95">
+            <Truck size={22} className="text-white" />
           </div>
+
           <div className="leading-none">
-            <span className="text-slate-900 text-xl font-black tracking-tighter block">RouteX</span>
-            <span className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-0.5 block">Entrepreneur</span>
+            <h1 className="text-[20px] font-black tracking-tight text-slate-900">
+              Route<span className="text-cyan-500">X</span>
+            </h1>
+            <p className="mt-1 text-[9px] uppercase tracking-[0.32em] text-slate-400 font-bold">
+              Entrepreneur
+            </p>
           </div>
         </Link>
       </div>
@@ -89,6 +96,7 @@ const EntrepreneurSidebar = () => {
             icon={link.icon}
             label={link.label}
             active={isActive(link.to)}
+            onClick={onClose}
           />
         ))}
       </nav>
