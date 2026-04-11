@@ -76,14 +76,14 @@ const MyDeliveries = () => {
       {/* ── Header ── */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
         <Motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-          <h1 className="text-2xl md:text-4xl font-black text-slate-900 tracking-tighter uppercase italic">Delivery History</h1>
+          <h1 className="text-2xl md:text-4xl font-black text-[#1D4ED8] tracking-tighter uppercase italic">Delivery History</h1>
           <p className="text-slate-400 font-bold text-xs md:text-sm uppercase tracking-widest mt-1">
             Reviewing <span className="text-slate-900 font-black">{filteredDeliveries.length}</span> recorded shipments
           </p>
         </Motion.div>
         
         <Motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex gap-3 w-full md:w-auto">
-          <Link to="/entrepreneur/create-delivery" className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-slate-900 text-white px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-slate-200 hover:bg-black transition-all active:scale-95">
+          <Link to="/entrepreneur/create-delivery" className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-[#1D4ED8] text-white px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-blue-100 hover:bg-blue-800 transition-all active:scale-95">
             <Plus size={16} /> New Request
           </Link>
         </Motion.div>

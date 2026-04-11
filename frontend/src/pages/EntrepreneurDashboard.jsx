@@ -39,18 +39,22 @@ const EntrepreneurDashboard = () => {
     try {
       const token = localStorage.getItem("token");
       const data = await getMyDeliveries(token);
-      const orders = data.orders || data;
+      
+      // Ensure orders is always an array
+      const orders = data && data.orders ? data.orders : (Array.isArray(data) ? data : []);
+      
       setStats({
         total:     orders.length,
         pending:   orders.filter(o => o.status === "available").length,
         inTransit: orders.filter(o => ["assigned", "picked_up", "in_transit"].includes(o.status)).length,
         delivered: orders.filter(o => o.status === "delivered").length,
       });
-      setDeliveries(orders.slice(0, 5));
+      setDeliveries(Array.isArray(orders) ? orders.slice(0, 5) : []);
       setLoading(false);
     } catch (err) {
-      console.error(err);
+      console.error("Error fetching dashboard data:", err);
       setLoading(false);
+      // Optional: Set some error state here if needed
     }
   };
 
@@ -90,9 +94,9 @@ const EntrepreneurDashboard = () => {
   );
 
   const statCards = [
-    { label: "Total Orders", value: stats.total,     icon: <Package size={20} />, accent: "text-slate-900", ring: "bg-slate-50" },
+    { label: "Total Orders", value: stats.total,     icon: <Package size={20} />, accent: "text-blue-600", ring: "bg-blue-50" },
     { label: "Pending",      value: stats.pending,   icon: <Clock size={20} />,   accent: "text-amber-600",  ring: "bg-amber-50"      },
-    { label: "In Transit",   value: stats.inTransit, icon: <Truck size={20} />,   accent: "text-slate-600",  ring: "bg-slate-100"  },
+    { label: "In Transit",   value: stats.inTransit, icon: <Truck size={20} />,   accent: "text-indigo-600",  ring: "bg-indigo-50"  },
     { label: "Delivered",    value: stats.delivered, icon: <CheckCircle size={20} />,   accent: "text-emerald-600",ring: "bg-emerald-50"    },
   ];
 
@@ -102,12 +106,12 @@ const EntrepreneurDashboard = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
         <Motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-          <h1 className="text-2xl md:text-4xl font-black text-slate-900 tracking-tighter uppercase italic">Executive Overview</h1>
+          <h1 className="text-2xl md:text-4xl font-black text-[#1D4ED8] tracking-tighter uppercase italic">Executive Overview</h1>
           <p className="text-slate-400 font-bold text-xs md:text-sm uppercase tracking-widest mt-1">Real-time logistics monitoring & partner insights</p>
         </Motion.div>
 
         <Motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex gap-3 w-full md:w-auto">
-          <Link to="/entrepreneur/create-delivery" className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-slate-900 text-white px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-slate-200 hover:bg-black transition-all active:scale-95">
+          <Link to="/entrepreneur/create-delivery" className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-[#1D4ED8] text-white px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-blue-100 hover:bg-blue-800 transition-all active:scale-95">
             <Plus size={16} /> New Order
           </Link>
         </Motion.div>
@@ -151,8 +155,8 @@ const EntrepreneurDashboard = () => {
               <h2 className="font-black text-slate-900 uppercase tracking-tighter text-lg">Recent Shipments</h2>
             </div>
             <Link 
-              to="/entrepreneur/my-deliveries" 
-              className="flex items-center gap-2 px-5 py-2.5 bg-slate-900 hover:bg-black text-white rounded-xl transition-all duration-300 text-[10px] font-black uppercase tracking-widest shadow-lg shadow-slate-200 group"
+              to="/entrepreneur/my-history" 
+              className="flex items-center gap-2 px-5 py-2.5 bg-slate-900 hover:bg-[#1D4ED8] text-white rounded-xl transition-all duration-300 text-[10px] font-black uppercase tracking-widest shadow-lg shadow-slate-200 group"
             >
               Explore History 
               <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
@@ -185,7 +189,7 @@ const EntrepreneurDashboard = () => {
                       <td className="px-6 py-4 text-right flex items-center justify-end md:justify-start gap-2">
                         <button
                           onClick={() => navigate(`/entrepreneur/track/${o._id}`)}
-                          className="p-2.5 inline-flex items-center justify-center bg-slate-100 text-slate-400 rounded-xl hover:bg-slate-900 hover:text-white transition-all shadow-sm hover:shadow-md"
+                          className="p-2.5 inline-flex items-center justify-center bg-slate-100 text-slate-400 rounded-xl hover:bg-[#1D4ED8] hover:text-white transition-all shadow-sm hover:shadow-md"
                           title="View Details & Track"
                         >
                           <ArrowRight size={16} />
@@ -204,29 +208,29 @@ const EntrepreneurDashboard = () => {
           initial={{ opacity: 0, y: 20 }} 
           animate={{ opacity: 1, y: 0 }} 
           transition={{ delay: 0.5 }}
-          className="bg-[#1D4ED8] text-white rounded-[2.5rem] shadow-xl p-8 relative overflow-hidden flex flex-col"
+          className="bg-white text-slate-900 rounded-[2.5rem] shadow-sm border border-slate-100 p-8 relative overflow-hidden flex flex-col"
         >
-          <div className="absolute top-0 right-0 p-8 opacity-10">
+          <div className="absolute top-0 right-0 p-8 opacity-[0.03] text-blue-600 pointer-events-none">
             <HelpCircle size={120} />
           </div>
 
           <div className="relative z-10 flex flex-col h-full">
             <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 bg-white/20 rounded-xl">
+              <div className="p-2 bg-blue-50 text-[#1D4ED8] rounded-xl">
                 <HelpCircle size={24} />
               </div>
               <div>
-                <h2 className="text-xl font-black uppercase tracking-tighter">Support Desk</h2>
-                <p className="text-blue-200 text-xs font-medium">Direct line to system admin</p>
+                <h2 className="text-xl font-black uppercase tracking-tighter text-slate-900">Support Desk</h2>
+                <p className="text-slate-400 text-xs font-bold uppercase tracking-wider">Direct line to system admin</p>
               </div>
             </div>
             
             <form onSubmit={handleInquiry} className="space-y-5 flex-1">
               <div>
-                <label className="text-[10px] font-black uppercase tracking-widest text-blue-200 ml-1">Subject</label>
+                <label className="text-[10px] font-black uppercase tracking-widest text-[#1D4ED8] ml-1">Subject</label>
                 <input 
                   name="subject"
-                  className="w-full mt-1.5 px-5 py-3.5 bg-white/10 border border-white/20 rounded-2xl text-white placeholder:text-blue-300 outline-none focus:ring-2 focus:ring-cyan-400 focus:bg-white/20 transition-all text-sm"
+                  className="w-full mt-1.5 px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#1D4ED8] transition-all text-sm font-medium"
                   placeholder="Order delay, pricing..."
                   value={inquiry.subject}
                   onChange={handleInquiryChange}
@@ -234,10 +238,10 @@ const EntrepreneurDashboard = () => {
                 />
               </div>
               <div>
-                <label className="text-[10px] font-black uppercase tracking-widest text-blue-200 ml-1">Message</label>
+                <label className="text-[10px] font-black uppercase tracking-widest text-[#1D4ED8] ml-1">Message</label>
                 <textarea 
                   name="message"
-                  className="w-full mt-1.5 px-5 py-3.5 bg-white/10 border border-white/20 rounded-2xl text-white placeholder:text-blue-300 outline-none focus:ring-2 focus:ring-cyan-400 focus:bg-white/20 transition-all resize-none text-sm"
+                  className="w-full mt-1.5 px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#1D4ED8] transition-all resize-none text-sm font-medium"
                   rows="4"
                   placeholder="Tell us what's wrong..."
                   value={inquiry.message}
@@ -245,7 +249,7 @@ const EntrepreneurDashboard = () => {
                   required
                 />
               </div>
-              <button type="submit" className="w-full bg-cyan-500 hover:bg-cyan-400 py-4 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95">
+              <button type="submit" className="w-full bg-[#1D4ED8] hover:bg-blue-800 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-2 shadow-lg shadow-blue-100 transition-all active:scale-95">
                 <Send size={16} /> Send Message
               </button>
             </form>
@@ -254,7 +258,7 @@ const EntrepreneurDashboard = () => {
               <Motion.div 
                 initial={{ opacity: 0, scale: 0.9 }} 
                 animate={{ opacity: 1, scale: 1 }}
-                className={`mt-6 p-4 rounded-2xl text-xs font-bold border flex items-center gap-3 ${statusMsg.type === 'success' ? 'bg-emerald-500/20 border-emerald-400/50 text-emerald-100' : 'bg-red-500/20 border-red-400/50 text-red-100'}`}
+                className={`mt-6 p-4 rounded-2xl text-xs font-bold border flex items-center gap-3 ${statusMsg.type === 'success' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-red-50 text-red-700 border-red-100'}`}
               >
                 {statusMsg.type === 'success' ? <CheckCircle size={18} /> : <AlertCircle size={18} />}
                 {statusMsg.text}

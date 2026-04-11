@@ -74,18 +74,18 @@ const MyHistory = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
         <Motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
           <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-emerald-50 text-emerald-600 rounded-xl">
+            <div className="p-2 bg-blue-50 text-[#1D4ED8] rounded-xl">
               <History size={24} />
             </div>
-            <h1 className="text-2xl md:text-4xl font-black text-slate-900 tracking-tighter uppercase italic">Delivery Archive</h1>
+            <h1 className="text-2xl md:text-4xl font-black text-[#1D4ED8] tracking-tighter uppercase italic">Delivery Archive</h1>
           </div>
           <p className="text-slate-400 font-bold text-xs md:text-sm uppercase tracking-widest mt-1">
-            Total Completed Missions: <span className="text-emerald-600 font-black">{deliveries.length}</span>
+            Total Completed Missions: <span className="text-blue-600 font-black">{deliveries.length}</span>
           </p>
         </Motion.div>
         
         <Motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex gap-3 w-full md:w-auto">
-          <Link to="/entrepreneur/dashboard" className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-slate-900 text-white px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-slate-200 hover:bg-black transition-all active:scale-95">
+          <Link to="/entrepreneur/dashboard" className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-[#1D4ED8] text-white px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-blue-100 hover:bg-blue-800 transition-all active:scale-95">
             Back to Dashboard
           </Link>
         </Motion.div>
@@ -130,7 +130,7 @@ const MyHistory = () => {
               <div className="flex justify-between items-start mb-6">
                 <div>
                   <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Order ID</span>
-                  <h3 className="text-xl font-black text-slate-900 group-hover:text-emerald-600 transition-colors">#{d.order_id}</h3>
+                  <h3 className="text-xl font-black text-slate-900 group-hover:text-[#1D4ED8] transition-colors">#{d.order_id}</h3>
                 </div>
                 <div className="flex flex-col items-end">
                    <span className="px-3 py-1 rounded-full text-[9px] font-black uppercase bg-emerald-100 text-emerald-700 border border-emerald-200 flex items-center gap-1">

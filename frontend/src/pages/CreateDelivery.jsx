@@ -93,7 +93,6 @@ const CreateDelivery = () => {
   const [mapCenter, setMapCenter]       = useState([6.9271, 79.8612]);
 
   const [formData, setFormData] = useState({
-    user_id:          '65d4f1a2e4b0d3c1a2f1b1a1',
     receiver_name:    '',
     receiver_phone:   '',
     receiver_email:   '',
@@ -200,13 +199,12 @@ const CreateDelivery = () => {
       <div className="w-full lg:w-[460px] flex flex-col bg-white shadow-2xl z-20 overflow-hidden">
 
         {/* Header Banner */}
-        <div className="relative bg-[#1D4ED8] px-8 py-7 shrink-0 overflow-hidden">
-          <div className="absolute -top-10 -right-10 w-40 h-40 bg-[#06B6D4]/20 rounded-full pointer-events-none" />
-          <div className="absolute -bottom-8 -left-8 w-28 h-28 bg-white/5 rounded-full pointer-events-none" />
+        <div className="relative bg-white border-b border-slate-100 px-8 py-7 shrink-0 overflow-hidden">
+          <div className="absolute -top-10 -right-10 w-40 h-40 bg-blue-50 rounded-full pointer-events-none" />
           <div className="relative z-10">
-            <p className="text-[#06B6D4] text-xs font-bold uppercase tracking-widest mb-1">Entrepreneur Portal</p>
-            <h2 className="text-2xl font-extrabold text-white tracking-tight leading-tight">New Delivery Request</h2>
-            <p className="text-blue-200 text-sm mt-1">Fill in details and pin locations on the map.</p>
+            <p className="text-[#1D4ED8] text-xs font-black uppercase tracking-[0.2em] mb-1">Entrepreneur Portal</p>
+            <h2 className="text-2xl font-black text-slate-900 tracking-tighter uppercase leading-tight italic">New Delivery Request</h2>
+            <p className="text-slate-400 text-[11px] font-bold uppercase tracking-widest mt-1">Surgical precision logistics deployment</p>
           </div>
         </div>
 
@@ -310,15 +308,15 @@ const CreateDelivery = () => {
             {/* ── Submit ── */}
             <div className="pb-2 space-y-3">
               <button type="submit" disabled={loading}
-                className="w-full py-3.5 bg-[#1D4ED8] hover:bg-[#1E40AF] active:scale-95 disabled:opacity-50
-                           text-white font-black rounded-2xl shadow-lg shadow-[#1D4ED8]/25
-                           transition-all text-sm tracking-wide">
+                className="w-full py-4 bg-[#1D4ED8] hover:bg-blue-800 active:scale-95 disabled:opacity-50
+                           text-white font-black rounded-2xl shadow-xl shadow-blue-100
+                           transition-all text-xs tracking-[0.2em] uppercase">
                 {loading ? (
                   <span className="flex items-center justify-center gap-2">
                     <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     Verifying Route…
                   </span>
-                ) : 'CONFIRM DELIVERY REQUEST'}
+                ) : 'Confirm Delivery Request'}
               </button>
 
               {error && (

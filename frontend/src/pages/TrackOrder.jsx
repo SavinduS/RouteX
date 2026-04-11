@@ -155,11 +155,11 @@ const TrackOrder = () => {
       {/* ── Top Navigation ── */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-6">
         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-          <Link to="/entrepreneur/my-deliveries" className="group inline-flex items-center gap-2 text-slate-500 hover:text-blue-600 font-bold text-sm mb-4 transition-colors">
-            <ArrowLeft size={18} className="transition-transform group-hover:-translate-x-1" /> Back to History
+          <Link to="/entrepreneur/my-deliveries" className="group inline-flex items-center gap-2 text-[#1D4ED8] hover:text-blue-800 font-black text-[10px] uppercase tracking-widest mb-4 transition-colors">
+            <ArrowLeft size={14} className="transition-transform group-hover:-translate-x-1" /> Back to History
           </Link>
-          <h1 className="text-2xl md:text-4xl font-black text-slate-900 tracking-tighter uppercase flex items-center gap-3">
-            <Navigation className="text-blue-600" size={32} /> Live Shipment Tracking
+          <h1 className="text-2xl md:text-4xl font-black text-[#1D4ED8] tracking-tighter uppercase flex items-center gap-3 italic">
+            <Navigation className="text-[#1D4ED8]" size={32} /> Live Shipment Tracking
           </h1>
           <p className="text-slate-500 font-medium text-sm md:text-base mt-1">
             Order Reference: <span className="text-slate-900 font-black">#{order.order_id}</span>

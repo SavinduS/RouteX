@@ -56,7 +56,7 @@ const getDeliveryById = async (req, res) => {
 const getMyDeliveries = async (req, res) => {
     try {
         const query = req.user ? { user_id: req.user.id } : {};
-        const orders = await Order.find(query).sort({ createdAt: -1 });
+        const orders = await Order.find(query).sort({ created_at: -1 });
         res.json({ orders });
     } catch (error) {
         res.status(500).json({ message: error.message });
