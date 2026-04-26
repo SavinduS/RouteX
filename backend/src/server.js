@@ -13,14 +13,13 @@ dotenv.config();
 const app = express();
 const server = http.createServer(app);
 
-const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:5173";
 const PORT = process.env.PORT || 5003;
 
 // Initialize Socket.io
 const io = new Server(server, {
   cors: {
-    origin: [CLIENT_URL],
-    methods: ["GET", "POST"],
+    origin: true, // Reflects the request origin
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
   },
 });
@@ -43,7 +42,7 @@ io.on("connection", (socket) => {
 // Middleware
 app.use(
   cors({
-    origin: [CLIENT_URL],
+    origin: true, // Reflects the request origin
     credentials: true,
   }),
 );

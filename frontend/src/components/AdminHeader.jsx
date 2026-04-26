@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { io } from "socket.io-client";
 import { getNotifications, markAsRead, markAllAsRead } from "../services/notificationService";
 
-const SOCKET_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5003';
+const BACKEND_URL_FROM_API = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '') : null;
+const SOCKET_URL = import.meta.env.VITE_BACKEND_URL || BACKEND_URL_FROM_API || 'http://localhost:5003';
 
 const AdminHeader = ({ toggleSidebar }) => {
     const [user, setUser] = useState(null);

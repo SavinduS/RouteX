@@ -1,11 +1,11 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { 
-  LayoutDashboard, 
-  Package, 
-  Coins, 
-  User, 
-  LogOut, 
+import {
+  LayoutDashboard,
+  Package,
+  Coins,
+  User,
+  LogOut,
   Navigation,
   Menu,
   X
@@ -37,7 +37,7 @@ const DriverSidebar = () => {
   return (
     <>
       {/* Mobile Toggle Button */}
-      <button 
+      <button
         onClick={() => setIsOpen(!isOpen)}
         className="md:hidden fixed top-4 left-4 z-[1100] p-2 bg-[#1D4ED8] text-white rounded-lg shadow-lg hover:bg-blue-700 transition-colors"
       >
@@ -89,15 +89,15 @@ const DriverSidebar = () => {
                   }`}
               >
                 {active && (
-                  <motion.div 
+                  <motion.div
                     layoutId="activeNav"
                     className="absolute inset-0 bg-white rounded-xl z-0"
                     initial={false}
                     transition={{ type: "spring", stiffness: 500, damping: 30 }}
                   />
                 )}
-                <link.icon 
-                  size={20} 
+                <link.icon
+                  size={20}
                   className={`relative z-10 transition-colors duration-300 ${active ? "text-[#1D4ED8]" : "text-blue-200 group-hover:text-white"}`}
                 />
                 <span className={`relative z-10 transition-colors duration-300 ${active ? "text-[#1D4ED8]" : ""}`}>
@@ -118,7 +118,6 @@ const DriverSidebar = () => {
               D
             </div>
             <div className="min-w-0">
-              <p className="text-white text-xs font-bold truncate">Driver Name</p>
               <div className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
                 <p className="text-blue-200 text-[10px] truncate">Available</p>
